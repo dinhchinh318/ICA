@@ -8,7 +8,7 @@ namespace LumaReef.Save
     {
         public int version=1;
         public long coins=5000,lifetimeKills;
-        public int diamonds=25,level=1,exp,unlockedGuns=1,selectedGun,cosmetics,selectedCosmetic;
+        public int diamonds=25,level=1,exp,unlockedGuns=255,selectedGun,cosmetics,selectedCosmetic;
         public float music=.45f,sfx=.7f;
         public string questDay="",dailyClaim="",username="";
         public long[] questProgress=new long[6];

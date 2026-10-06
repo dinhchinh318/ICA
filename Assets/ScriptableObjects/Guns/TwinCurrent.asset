@@ -18,7 +18,7 @@ MonoBehaviour:
   bet: 50
   barrels: 1
   unlockCost: 0
-  fireRate: 4.8
+  fireRate: 6.5
   netRadius: 0.75
   power: 1
   color: {r: 0.8128001, g: 0.27999997, b: 1, a: 1}

@@ -116,8 +116,11 @@ namespace LumaReef.Core
             // Cấp gói quà VIP Cực Khủng vào tài khoản (100M coins + 9999 kim cương)
             if (SaveData.coins < 100000000) { SaveData.coins = 100000000; ui.Toast("🎁 VIP GIFT: +100,000,000 VÀNG  +9,999 KIM CƯƠNG!"); }
             if (SaveData.diamonds < 9999) SaveData.diamonds = 9999;
+            if (SaveData.unlockedGuns < 255) SaveData.unlockedGuns = 255; // Mở khóa tất cả 8 súng miễn phí
             Wallet = new Wallet(SaveData.coins, SaveData.diamonds);
             Wallet.Changed += () => dirty = true;
+            // Rebuild Loadout với mask mới
+            Loadout = new GunLoadout(Catalog.room, SaveData.selectedGun, SaveData.unlockedGuns);
             
             // Re-bind wallet cho các hệ thống
             Combat = new CombatResolver(fish, Wallet, new OfflineCombatAuthority(Environment.TickCount));
@@ -298,7 +301,7 @@ namespace LumaReef.Core
         {
             string[] categories={"CANNONS","BOLTS","SKILLS","AVATAR","FRAME","EFFECTS"};
             ui.BeginPanel("REEF OUTFITTERS / "+categories[category],"Virtual currency only. Balance: "+Wallet.Coins.ToString("N0")+" coins / "+Wallet.Diamonds+" gems.");
-            if(category==0)for(int i=0;i<Catalog.room.guns.Length;i++) { int index=i; var g=Catalog.room.guns[i]; bool owned=Loadout.Unlocked(i); ui.Row(i,"LV "+(i+1)+"  "+g.displayName+"   /   BET "+g.bet,Loadout.Selected==i?"EQUIPPED":owned?"EQUIP":g.unlockCost+" COIN",()=>{if(!Loadout.Purchase(index,Wallet))ui.Toast("Not enough coins."); SaveNow(); Shop(category);}); }
+            if(category==0)for(int i=0;i<Catalog.room.guns.Length;i++) { int index=i; var g=Catalog.room.guns[i]; bool owned=Loadout.Unlocked(i); string label=Loadout.Selected==i?"EQUIPPED":"EQUIP"; ui.Row(i,"CẤP "+(i+1)+"  "+g.displayName+"  |  CƯỢC "+g.bet+" VX",label,()=>{Loadout.Purchase(index,Wallet); SaveNow(); Shop(category);}); }
             else if(category==2)ui.Row(1,"Recharge every skill immediately","5 GEMS",()=>{if(Wallet.SpendDiamonds(5)){Skills.Reset();ui.Toast("SKILLS RECHARGED");SaveNow();}else ui.Toast("Not enough gems.");});
             else
             {
