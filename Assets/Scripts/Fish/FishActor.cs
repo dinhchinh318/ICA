@@ -40,8 +40,8 @@ namespace LumaReef.Fish
             Vector2 tangent=path.Tangent(progress);
             Transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(tangent.y,tangent.x)*Mathf.Rad2Deg);
             Renderer.flipY=tangent.x<0;
-            Transform.localScale=new Vector3(Data.size,Data.size*(1+Mathf.Sin(age*8)*.035f),1);
-            Renderer.color=flash>0?new Color(2,2,2):frozen?new Color(.55f,.85f,1):Color.white;
+            Transform.localScale=new Vector3(Data.size*(1+flash*1.5f),Data.size*(1+Mathf.Sin(age*8)*.035f+flash*1.5f),1);
+            Renderer.color=flash>0?new Color(1f,.3f,.3f):frozen?new Color(.55f,.85f,1):Color.white;
         }
         public void Hit() { flash=.10f; }
         public void Die() { Release(); }

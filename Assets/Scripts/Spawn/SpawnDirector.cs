@@ -69,9 +69,9 @@ namespace LumaReef.Spawn
             bossTimer = UnityEngine.Random.Range(20f, waveTimer - 20f);
             
             if (currentWaveType == WaveType.Chaotic) {
-                Announcement?.Invoke($"ĐỢT {waveCount} : BIỂN ĐỘNG - CÁ XUẤT HIỆN HỖN LOẠN");
+                Announcement?.Invoke($"🌊 ĐỢT {waveCount} : BIỂN ĐỘNG - THỦY QUÁI XUẤT HIỆN 🌊");
             } else {
-                Announcement?.Invoke($"ĐỢT {waveCount} : ĐỘI HÌNH TIẾN CÔNG");
+                Announcement?.Invoke($"⚔️ ĐỢT {waveCount} : ĐẠI ĐỘI HÌNH TIẾN CÔNG ⚔️");
             }
         }
         
@@ -95,7 +95,7 @@ namespace LumaReef.Spawn
             if(category==FishCategory.Boss&&HasBoss)return;
             
             FishData data=Choose(category); 
-            int count=category>=FishCategory.Large?1:formation==Formation.Single?1:UnityEngine.Random.Range(6,12); // Tăng đàn cá lên
+            int count=category>=FishCategory.Large?1:formation==Formation.Single?1:UnityEngine.Random.Range(10,20); // Bầy cá ĐÔNG hơn cho hoành tráng
             
             var path=room.paths[UnityEngine.Random.Range(0,room.paths.Length)];
             for(int i=0;i<count;i++)

@@ -19,7 +19,7 @@ namespace LumaReef.VFX
             this.sprites=sprites;
             var go=new GameObject("Pooled impact / net / explosion"); transform=go.transform; transform.SetParent(root);
             particles=go.AddComponent<ParticleSystem>(); particles.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
-            var main=particles.main; main.playOnAwake=false; main.loop=false; main.duration=.6f; main.startLifetime=.45f; main.startSpeed=1.5f; main.startSize=.075f; main.maxParticles=24; main.simulationSpace=ParticleSystemSimulationSpace.World;
+            var main=particles.main; main.playOnAwake=false; main.loop=false; main.duration=.6f; main.startLifetime=.45f; main.startSpeed=3.0f; main.startSize=.18f; main.maxParticles=100; main.simulationSpace=ParticleSystemSimulationSpace.World;
             var emission=particles.emission; emission.enabled=false;
             var shape=particles.shape; shape.shapeType=ParticleSystemShapeType.Circle; shape.radius=.1f;
             var pr=go.GetComponent<ParticleSystemRenderer>(); pr.sharedMaterial=material; pr.sortingOrder=35;
@@ -30,7 +30,7 @@ namespace LumaReef.VFX
         public void Play(Vector2 at,float size,Color tint,bool lightning=false,Vector2 end=default,int spriteIndex=2,float rotation=0)
         {
             Active=true;age=0;artIndex=spriteIndex;duration=lightning?.22f:spriteIndex<2?.6f:.4f;radius=size;color=tint;beam=lightning;transform.position=at;transform.gameObject.SetActive(true);
-            var main=particles.main; main.startColor=tint; main.startSpeed=Mathf.Max(.5f,size*2); particles.Emit(size>.2f?18:5);
+            var main=particles.main; main.startColor=tint; main.startSpeed=Mathf.Max(1.0f,size*3f); particles.Emit(size>.2f?35:15);
             ring.positionCount=33;ring.enabled=lightning||(sprites==null||sprites.Length==0)&&size>.2f;
             artwork.enabled=!lightning&&sprites!=null&&spriteIndex<sprites.Length;
             if(artwork.enabled){artwork.sprite=sprites[spriteIndex];artwork.transform.localRotation=Quaternion.Euler(0,0,rotation);artwork.transform.localScale=Vector3.one*(radius*2);artwork.color=Color.white;}

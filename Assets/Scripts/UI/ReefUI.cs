@@ -177,12 +177,18 @@ namespace LumaReef.UI
         {for(int i=0;i<names.Length;i++){int index=i;Button(modalContent,names[i],-322+(i%3)*322,-589-(i/3)*80,305,67,new Color(.05f,.27f,.38f),()=>callback(index),22);}}
         public void Tick(float dt)
         {
-            if(eventTime>0&&(eventTime-=dt)<=0)eventText.text="";if(toastTime>0&&(toastTime-=dt)<=0)toast.text="";
+            if(eventTime>0){eventTime-=dt;eventText.transform.localScale=Vector3.one*(1+Mathf.Sin(eventTime*12)*.05f);if(eventTime<=0)eventText.text="";}
+            if(toastTime>0&&(toastTime-=dt)<=0)toast.text="";
             // Auto-dismiss jackpot
             if(jackpotTime>0){jackpotTime-=dt;if(jackpotTime<=0)jackpotOverlay.SetActive(false);}
             hudTimer-=dt;if(hudTimer>0)return;hudTimer=.1f;
+            double prev=displayedCoins;
             displayedCoins=Math.Abs(displayedCoins-app.Wallet.Coins)<2?app.Wallet.Coins:displayedCoins+(app.Wallet.Coins-displayedCoins)*.35;
             string value=((long)displayedCoins).ToString("N0");balance.text=value;menuBalance.text=value;gemBalance.text=menuGems.text=app.Wallet.Diamonds.ToString("N0");
+            // Animation số dư nảy lên khi nhận tiền
+            float scale = 1f + Mathf.Clamp01((float)(displayedCoins - prev) / 1000f) * 0.4f;
+            balance.transform.localScale = Vector3.Lerp(balance.transform.localScale, Vector3.one * scale, 0.4f);
+            if (Mathf.Abs(balance.transform.localScale.x - 1f) < 0.02f) balance.transform.localScale = Vector3.one;
             profile.text="ID: LUMA-0001       CẤP "+app.SaveData.level;avatar.sprite=app.Catalog.room.fish[(app.SaveData.selectedCosmetic&8)!=0?23:0].sprite;avatarFrame.color=(app.SaveData.selectedCosmetic&16)!=0?new Color(1,.4f,.85f):Color.white;
             bet.text="CƯỢC  "+app.Loadout.Bet;gunLabel.text="SÚNG CẤP "+(app.Loadout.Selected+1);autoLabel.color=app.Auto?Aqua:Color.white;lockLabel.color=app.Lock?Aqua:Color.white;
             for(int i=0;i<6;i++){float cd=app.Skills.Cooldown(i);skillButtons[i].interactable=cd<=0;skillLabels[i].text=cd>0?Mathf.CeilToInt(cd)+"s":app.Catalog.skills[i].displayName;}
