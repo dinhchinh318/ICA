@@ -91,7 +91,49 @@ namespace LumaReef.Core
             spawner.Announcement+=value=>{ui.Announce(value); if(spawner.HasBoss){Audio.Play(SoundCue.Warning); cameraFX.Pulse(.13f); effects.Burst(new Vector2(0,3),3,ReefUI.Gold);}};
             Skills.Activated+=OnSkill;
             SeedFish(); gameManager.SetState(GameState.Menu);
-            if(smoke)StartCoroutine(SmokeTest()); else StartCoroutine(LoadScene("MainMenuScene",false));
+            AuthenticateAndStart();
+        }
+        
+        async void AuthenticateAndStart()
+        {
+            if(smoke){ StartCoroutine(SmokeTest()); return; }
+            ui.Loading(true);
+            ui.Toast("🌐 KẾT NỐI SERVER CLOUD...");
+            
+            // Sinh username ngẫu nhiên nếu chưa có
+            string username = SaveData.username;
+            if(string.IsNullOrEmpty(username))
+            {
+                username = "Captain" + UnityEngine.Random.Range(1000,9999);
+                SaveData.username = username;
+            }
+            
+            // Mô phỏng đăng nhập Online lưu database (chuẩn bị cho multiplayer 4 người)
+            await LumaReef.Network.DatabaseManager.AuthenticateAsync(username, "auth_token_" + username);
+            
+            ui.Toast("✅ XÁC THỰC THÀNH CÔNG!  CHÀO " + username.ToUpperInvariant());
+            
+            // Cấp gói quà VIP Cực Khủng vào tài khoản (100M coins + 9999 kim cương)
+            if (SaveData.coins < 100000000) { SaveData.coins = 100000000; ui.Toast("🎁 VIP GIFT: +100,000,000 VÀNG  +9,999 KIM CƯƠNG!"); }
+            if (SaveData.diamonds < 9999) SaveData.diamonds = 9999;
+            Wallet = new Wallet(SaveData.coins, SaveData.diamonds);
+            Wallet.Changed += () => dirty = true;
+            
+            // Re-bind wallet cho các hệ thống
+            Combat = new CombatResolver(fish, Wallet, new OfflineCombatAuthority(Environment.TickCount));
+            specials = new SpecialFishController(Catalog.room, Combat, fish, Wallet);
+            quests = new QuestController(SaveData, Catalog.quests, Wallet);
+            
+            Combat.Killed += OnKilled; Combat.Impact += (at, radius, color) => { effects.Net(at, radius, color, Loadout.Current.level); Audio.Play(SoundCue.Hit); };
+            Combat.BigWin += OnBigWin;
+            specials.Lightning += (from, to) => { effects.Lightning(from, to); Audio.Play(SoundCue.Lightning); };
+            specials.Treasure += (at, reward) => { rewards.Play(at, reward, true); effects.Burst(at, 1.5f, ReefUI.Gold); quests.Add(QuestMetric.Earnings, reward); ui.Toast("💎 KHO BÁU!  +" + reward.ToString("N0")); };
+
+            // Sync profile lên cloud
+            _ = LumaReef.Network.DatabaseManager.SaveProfileAsync(SaveData);
+            
+            ui.Loading(false);
+            StartCoroutine(LoadScene("MainMenuScene",false));
         }
         void BuildEnvironment()
         {

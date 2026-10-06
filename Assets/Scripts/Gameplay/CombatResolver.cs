@@ -106,10 +106,10 @@ namespace LumaReef.Gameplay
                 // Retire before callbacks: special chains cannot reward the same fish twice.
                 f.Die(); wallet.Credit(reward); Killed?.Invoke(data,position,reward,bet);
                 
-                // Phát sự kiện BigWin nếu thắng lớn
-                bool isBigWin = data.category >= FishCategory.Boss || 
-                                data.category >= FishCategory.Special ||
-                                (data.category == FishCategory.Large && reward > baseReward * 1.5);
+                // Phát sự kiện BigWin nếu thắng lớn (Boss, Special, hoặc Large có gacha bonus)
+                bool isBigWin = data.category == FishCategory.Boss || 
+                                data.category == FishCategory.Special ||
+                                (data.category == FishCategory.Large && reward > baseReward);
                 if(isBigWin) BigWin?.Invoke(data,position,reward);
             }
             else f.Hit();

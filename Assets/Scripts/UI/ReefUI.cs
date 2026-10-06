@@ -20,10 +20,21 @@ namespace LumaReef.UI
         readonly Text[] skillLabels=new Text[6];
         readonly Button[] skillButtons=new Button[6];
         readonly Image bossFill,avatar,avatarFrame;
+        readonly RectTransform bossBar;
         double displayedCoins;
         float eventTime,toastTime,hudTimer,jackpotTime;
+        float toastSlide; // -1 = hidden, 0..1 = visible
+        float bossBarPulse;
+        float jackpotShake;
+        int jackpotCoinFrame;
+        float jackpotCoinTimer;
+        readonly Text[] jackpotCoins=new Text[18];
+        readonly RectTransform[] jackpotCoinRT=new RectTransform[18];
         GameObject jackpotOverlay;
-        Text jackpotTitle,jackpotAmount;
+        Text jackpotTitle,jackpotAmount,jackpotMult;
+        RectTransform jackpotPanel;
+        RectTransform toastRT;
+
         public bool ModalOpen=>modal.activeSelf;
         public bool DebugOpen=>debug.activeSelf;
         public ReefUI(ReefApp app,Font font)
@@ -31,16 +42,19 @@ namespace LumaReef.UI
             this.app=app;this.font=font;
             var go=new GameObject("Portrait Canvas 1080x1920",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));go.transform.SetParent(app.transform);
             var canvas=go.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=100;
-            var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1080,1920);scaler.screenMatchMode=CanvasScaler.ScreenMatchMode.Expand;
+            // Sharper canvas: MatchWidthOrHeight=0.5 giữ tỉ lệ chuẩn cho cả portrait lẫn landscape
+            var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1080,1920);scaler.screenMatchMode=CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;scaler.matchWidthOrHeight=0.5f;
             root=(RectTransform)go.transform;
             new GameObject("Input UI",typeof(EventSystem),typeof(InputSystemUIInputModule)).transform.SetParent(app.transform);
+            // ─── LOBBY / MENU ───────────────────────────────────────────────
             menu=Panel(root,"Lobby",0,0,1080,1920,new Color(.035f,.16f,.27f)).gameObject;
             if(app.Catalog.lobbyBackground!=null)Art(menu.transform,app.Catalog.lobbyBackground,0,0,1080,1920,false);
-            Panel(menu.transform,"Header",0,884,1080,152,new Color(.02f,.07f,.17f,.74f));
+            Panel(menu.transform,"Header",0,884,1080,152,new Color(.02f,.07f,.17f,.82f));
             Button(menu.transform,"☰",-474,880,86,88,new Color(.04f,.32f,.53f),()=>app.OpenPanel("SETTINGS"),40);
             Plate(menu.transform,-156,880,477,80);Icon(menu.transform,0,-355,884,77);
             Plate(menu.transform,319,880,395,80);Icon(menu.transform,1,172,884,77);
             menuBalance=Label(menu.transform,"",-116,880,332,72,31,Color.white);menuGems=Label(menu.transform,"",329,880,220,72,31,Color.white);
+            // Profile card với gradient đẹp
             Plate(menu.transform,-163,746,708,156);
             avatarFrame=Art(menu.transform,app.Catalog.disk,-419,750,146,146);avatarFrame.color=Gold;
             if(app.Catalog.uiSkins.Length>3){avatarFrame.sprite=app.Catalog.uiSkins[3];avatarFrame.color=Color.white;}
@@ -48,6 +62,7 @@ namespace LumaReef.UI
             Label(menu.transform,"THUYỀN TRƯỞNG",-82,785,465,42,29,Color.white);
             profile=Label(menu.transform,"",-82,738,465,44,24,Aqua);
             Label(menu.transform,"◆ NHÀ THÁM HIỂM ĐẠI DƯƠNG",-56,695,514,35,19,Gold);
+            // Logo to bự, chữ cực đẹp
             Label(menu.transform,"LUMA REEF",0,553,850,103,70,Gold);
             Label(menu.transform,"HUYỀN THOẠI BIỂN SÂU",0,487,700,44,25,Color.white);
             Badge(menu.transform,6,"ĐIỂM DANH",-434,351,()=>app.OpenPanel("DAILY REWARD"));
@@ -64,8 +79,9 @@ namespace LumaReef.UI
             Panel(menu.transform,"Navigation",0,-909,1080,142,new Color(.01f,.12f,.23f,.95f));
             string[] tabs={"Hộp thư","Cửa hàng","Nhiệm vụ","Bộ sưu tập","Bạn bè","Cài đặt"};string[] actions={"MAIL","SHOP","QUEST","ACHIEVEMENT","FRIENDS","SETTINGS"};int[] icons={2,3,4,5,15,7};
             for(int i=0;i<tabs.Length;i++){string action=actions[i];Badge(menu.transform,icons[i],tabs[i],-450+i*180,-891,()=>app.OpenPanel(action),.95f);}
+            // ─── GAMEPLAY HUD ───────────────────────────────────────────────
             game=Panel(root,"Portrait gameplay HUD",0,0,1080,1920,Color.clear).gameObject;
-            Panel(game.transform,"Header shade",0,889,1080,142,new Color(.01f,.08f,.14f,.88f));
+            Panel(game.transform,"Header shade",0,889,1080,142,new Color(.01f,.08f,.14f,.92f));
             Button(game.transform,"‹",-474,881,90,85,new Color(.06f,.33f,.48f),()=>app.Menu(),53);
             Icon(game.transform,0,-350,882,73);Icon(game.transform,1,150,882,70);
             balance=Label(game.transform,"",-119,880,313,76,30,Gold);gemBalance=Label(game.transform,"",280,880,234,76,30,Gold);
@@ -78,9 +94,14 @@ namespace LumaReef.UI
                 skillLabels[i]=Label(skillButtons[i].transform,"",0,-48,140,38,20,Color.white);
             }
             eventText=Label(game.transform,"",0,466,995,82,30,Gold);
-            bossRoot=Panel(game.transform,"Boss",0,561,958,77,new Color(.08f,.02f,.16f,.9f)).gameObject;
-            bossLabel=Label(bossRoot.transform,"",0,14,904,37,25,Gold);
-            var track=Panel(bossRoot.transform,"HP track",0,-22,902,12,new Color(.16f,.12f,.24f));bossFill=Panel(track,"HP",0,0,902,12,new Color(.95f,.26f,.49f)).GetComponent<Image>();
+            // Boss bar xịn hơn với border
+            var bossContainer=Panel(game.transform,"Boss Container",0,561,980,86,new Color(.02f,.005f,.04f,.0f));
+            bossRoot=bossContainer.gameObject;
+            Panel(bossContainer,"Boss bg",0,0,970,80,new Color(.08f,.02f,.16f,.95f));
+            bossLabel=Label(bossContainer,"",0,16,920,40,25,new Color(1,.55f,.75f));
+            var track=Panel(bossContainer,"HP track",0,-18,930,16,new Color(.16f,.12f,.24f));
+            bossFill=Panel(track,"HP",0,0,930,16,new Color(.95f,.26f,.49f)).GetComponent<Image>();
+            bossBar=track;
             Badge(game.transform,3,"ĐỔI SÚNG",437,-592,()=>app.OpenPanel("SHOP"),.8f);
             Badge(game.transform,4,"NHIỆM VỤ",-437,-592,()=>app.OpenPanel("QUEST"),.8f);
             autoLabel=Button(game.transform,"TỰ ĐỘNG",-370,-774,262,88,new Color(.035f,.28f,.39f,.95f),()=>app.ToggleAuto(),26).GetComponentInChildren<Text>();
@@ -91,6 +112,7 @@ namespace LumaReef.UI
             Button(game.transform,"+",140,-919,78,64,new Color(.05f,.34f,.48f),()=>app.Loadout.ChangeBet(1),41);
             gunLabel=Label(game.transform,"",347,-919,314,64,23,Color.white);
             Label(game.transform,"GIỮ ĐỂ BẮN • CHẠM ĐỂ NGẮM",0,-693,700,39,21,Muted);
+            // ─── MODALS ─────────────────────────────────────────────────────
             modal=Panel(root,"Modal shade",0,0,1080,1920,new Color(0,.025f,.07f,.87f),true).gameObject;
             modalContent=Panel(modal.transform,"Modal edge",0,0,1016,1450,Gold);Panel(modalContent,"Modal inner",0,0,1004,1438,Ink);
             if(app.Catalog.uiSkins.Length>4){Skin(modalContent.GetComponent<Image>(),4);modalContent.GetChild(0).GetComponent<Image>().color=Color.clear;}
@@ -99,19 +121,50 @@ namespace LumaReef.UI
             string[] commands={"+10,000 COINS","SPAWN SMALL","SPAWN LARGE","SPAWN SPECIAL","SPAWN BOSS","KILL ALL","NEXT GUN","CHANGE BET","GOD MODE","COLLIDERS","FISH WAVE"};
             for(int i=0;i<commands.Length;i++){int index=i;Button(debug.transform,commands[i],0,562-i*96,880,78,new Color(.07f,.26f,.37f),()=>app.DebugAction(index),27);}
             fpsText=Label(debug.transform,"",0,-570,900,99,27,Muted);Button(debug.transform,"ĐÓNG",0,-665,380,65,new Color(.13f,.33f,.4f),ToggleDebug,27);
-            toast=Label(root,"",0,323,990,110,30,Color.white);
+            // ─── TOAST (slide-in animation) ─────────────────────────────────
+            var toastGo=new GameObject("Toast",typeof(RectTransform),typeof(Image));toastGo.transform.SetParent(root,false);
+            toastRT=(RectTransform)toastGo.transform;toastRT.anchoredPosition=new Vector2(0,280);toastRT.sizeDelta=new Vector2(900,80);
+            var toastBG=toastGo.GetComponent<Image>();toastBG.color=new Color(.04f,.28f,.45f,.92f);
+            Panel(toastRT,"Toast border",0,0,900,80,new Color(1,.82f,.22f,.6f));
+            toast=Label(toastRT,"",0,0,880,72,28,Color.white);
+            toastRT.anchoredPosition=new Vector2(0,1100); // Start off screen
+            toastSlide=-1;
+            // Loading screen
             loading=Panel(root,"Loading",0,0,1080,1920,Ink,true).gameObject;Icon(loading.transform,14,0,110,280);
             Label(loading.transform,"ĐANG KHÁM PHÁ ĐẠI DƯƠNG…",0,-127,970,130,34,Aqua);
-            modal.SetActive(false);debug.SetActive(false);loading.SetActive(false);bossRoot.SetActive(false);ShowMenu(true);
-            // Jackpot overlay toàn màn hình
-            jackpotOverlay=Panel(root,"Jackpot overlay",0,0,1080,1920,new Color(0,.01f,.06f,.92f),false).gameObject;
-            var glow=Panel(jackpotOverlay.transform,"Glow",0,120,920,440,new Color(.7f,.5f,.05f,.18f)).gameObject;
-            Label(jackpotOverlay.transform,"🎊 NỔ HŨ! 🎊",0,380,960,140,72,new Color(1,.92f,.1f));
-            jackpotTitle=Label(jackpotOverlay.transform,"",0,190,960,110,46,Color.white);
-            Label(jackpotOverlay.transform,"PHẦN THƯỞNG",0,90,700,72,32,new Color(.8f,.85f,1f));
-            jackpotAmount=Label(jackpotOverlay.transform,"",0,-50,960,130,66,new Color(1,.92f,.1f));
-            Label(jackpotOverlay.transform,"CHÚC MỪNG!",0,-200,700,80,34,Gold);
+            // ─── JACKPOT OVERLAY siêu bùng nổ ──────────────────────────────
+            jackpotOverlay=new GameObject("Jackpot Overlay",typeof(RectTransform),typeof(Canvas));
+            jackpotOverlay.transform.SetParent(root,false);
+            jackpotOverlay.GetComponent<Canvas>().overrideSorting=true;
+            jackpotOverlay.GetComponent<Canvas>().sortingOrder=200;
+            var jpRT=(RectTransform)jackpotOverlay.transform;jpRT.anchoredPosition=Vector2.zero;jpRT.sizeDelta=new Vector2(1080,1920);
+            // Full screen dark flash
+            Panel(jpRT,"JP bg",0,0,1080,1920,new Color(0,.01f,.06f,.93f));
+            // Animated glow panel
+            jackpotPanel=Panel(jpRT,"JP panel",0,80,1000,700,new Color(.12f,.07f,.01f,.0f));
+            Panel(jackpotPanel,"Glow 1",0,0,940,620,new Color(.6f,.42f,.02f,.22f));
+            Panel(jackpotPanel,"Glow 2",0,0,860,540,new Color(.9f,.65f,.04f,.12f));
+            // Labels
+            Label(jpRT,"🎊",0,520,300,180,110,new Color(1,.92f,.1f));
+            Label(jpRT,"NỔ HŨ !!",0,380,960,140,76,new Color(1,.92f,.1f));
+            jackpotTitle=Label(jpRT,"",0,230,960,110,44,Color.white);
+            Label(jpRT,"PHẦN THƯỞNG KHỔNG LỒ",0,145,900,75,28,new Color(.8f,.85f,1f));
+            jackpotAmount=Label(jpRT,"",0,20,960,130,72,new Color(1,.92f,.1f));
+            jackpotMult=Label(jpRT,"",0,-90,700,65,30,new Color(.6f,.95f,.7f));
+            Label(jpRT,"🎊 CHÚC MỪNG! 🎊",0,-190,880,80,34,Gold);
+            Label(jpRT,"CHẠM ĐỂ TIẾP TỤC",0,-310,700,55,22,Muted);
+            // Coin rain sprites
+            for(int i=0;i<18;i++)
+            {
+                var crt=Panel(jpRT,"Coin"+i,UnityEngine.Random.Range(-520f,520f),UnityEngine.Random.Range(-1000f,-500f),55,55,Gold);
+                var cImg=crt.GetComponent<Image>();cImg.sprite=app.Catalog.disk;cImg.color=new Color(1,.85f,.15f,0);
+                jackpotCoinRT[i]=crt;jackpotCoins[i]=Label(crt,"✦",0,0,55,55,22,new Color(1,.6f,.1f));
+            }
+            // Tap to dismiss
+            var dismissBtn=jackpotOverlay.AddComponent<Button>();dismissBtn.onClick.AddListener(()=>{jackpotOverlay.SetActive(false);jackpotTime=0;});
+            var dismissImg=jackpotOverlay.AddComponent<Image>();dismissImg.color=Color.clear;dismissImg.raycastTarget=true;
             jackpotOverlay.SetActive(false);
+            modal.SetActive(false);debug.SetActive(false);loading.SetActive(false);bossRoot.SetActive(false);ShowMenu(true);
         }
         RectTransform Panel(Transform parent,string name,float x,float y,float w,float h,Color color,bool blocks=false)
         {var go=new GameObject(name,typeof(RectTransform),typeof(Image));var rt=(RectTransform)go.transform;rt.SetParent(parent,false);rt.anchoredPosition=new Vector2(x,y);rt.sizeDelta=new Vector2(w,h);var image=go.GetComponent<Image>();image.color=color;image.raycastTarget=blocks;return rt;}
@@ -153,12 +206,25 @@ namespace LumaReef.UI
         public void ShowMenu(bool value){menu.SetActive(value);game.SetActive(!value);modal.SetActive(false);debug.SetActive(false);}
         public void Loading(bool value)=>loading.SetActive(value);
         public void Announce(string value){eventText.text=value;eventTime=5;}
-        public void Toast(string value){toast.text=value;toastTime=3;}
+        public void Toast(string value)
+        {
+            toast.text=value;toastTime=3.2f;toastSlide=0;
+            // Slide in from top
+            if(toastRT!=null)toastRT.anchoredPosition=new Vector2(0,1100);
+        }
         public void ShowJackpot(string fishName,long reward)
         {
             jackpotTitle.text=fishName.ToUpperInvariant();
             jackpotAmount.text="+ "+reward.ToString("N0")+" VÀNG";
-            jackpotOverlay.SetActive(true); jackpotTime=3.5f;
+            jackpotMult.text="🎰 JACKPOT x"+(reward/(Mathf.Max(1,app.Loadout.Bet))).ToString("N0");
+            jackpotOverlay.SetActive(true); jackpotTime=5f; jackpotShake=0.5f;
+            // Reset coins
+            for(int i=0;i<18;i++)
+            {
+                float rx=UnityEngine.Random.Range(-510f,510f);
+                jackpotCoinRT[i].anchoredPosition=new Vector2(rx,-900);
+                var img=jackpotCoinRT[i].GetComponent<Image>();img.color=new Color(1,.85f,.15f,0);
+            }
         }
         public void ToggleDebug()=>debug.SetActive(!debug.activeSelf);
         public void CloseModal(){modal.SetActive(false);app.Resume();}
@@ -177,10 +243,50 @@ namespace LumaReef.UI
         {for(int i=0;i<names.Length;i++){int index=i;Button(modalContent,names[i],-322+(i%3)*322,-589-(i/3)*80,305,67,new Color(.05f,.27f,.38f),()=>callback(index),22);}}
         public void Tick(float dt)
         {
+            // ── Toast slide animation ──────────────────────────────────────
+            if(toastSlide>=0 && toastRT!=null)
+            {
+                toastSlide=Mathf.MoveTowards(toastSlide,1,dt*5);
+                float targetY=toastTime>0.3f?280:-200;
+                float curY=toastRT.anchoredPosition.y;
+                toastRT.anchoredPosition=new Vector2(0,Mathf.Lerp(curY,targetY,dt*8));
+                if(toastTime>0)toastTime-=dt;
+                if(toastTime<=0&&Mathf.Abs(curY-(-200))<2){toastRT.anchoredPosition=new Vector2(0,-200);toastSlide=-1;toast.text="";}
+            }
+            // ── Event text bounce ─────────────────────────────────────────
             if(eventTime>0){eventTime-=dt;eventText.transform.localScale=Vector3.one*(1+Mathf.Sin(eventTime*12)*.05f);if(eventTime<=0)eventText.text="";}
-            if(toastTime>0&&(toastTime-=dt)<=0)toast.text="";
-            // Auto-dismiss jackpot
-            if(jackpotTime>0){jackpotTime-=dt;if(jackpotTime<=0)jackpotOverlay.SetActive(false);}
+            // ── Boss bar pulse ────────────────────────────────────────────
+            bossBarPulse+=dt*4;
+            if(bossRoot.activeSelf && bossFill!=null)
+            {
+                float pulse=1+Mathf.Sin(bossBarPulse)*.06f;
+                bossBar.localScale=new Vector3(1,pulse,1);
+                bossFill.color=Color.Lerp(new Color(.95f,.26f,.49f),new Color(1,.55f,.75f),Mathf.Sin(bossBarPulse)*.5f+.5f);
+            }
+            // ── Jackpot coin rain ─────────────────────────────────────────
+            if(jackpotTime>0)
+            {
+                jackpotTime-=dt;
+                // Shake the panel
+                if(jackpotShake>0){ jackpotShake-=dt; if(jackpotPanel!=null)jackpotPanel.anchoredPosition=new Vector2(Mathf.Sin(jackpotShake*60)*8*(jackpotShake/.5f),80); }
+                else if(jackpotPanel!=null)jackpotPanel.anchoredPosition=new Vector2(0,80);
+                // Animate coins raining down and fading in
+                jackpotCoinTimer-=dt;
+                for(int i=0;i<18;i++)
+                {
+                    var pos=jackpotCoinRT[i].anchoredPosition;
+                    pos.y+=dt*600;
+                    var col=jackpotCoinRT[i].GetComponent<Image>().color;
+                    if(pos.y<400)col.a=Mathf.MoveTowards(col.a,1,dt*3);
+                    if(pos.y>600)col.a=Mathf.MoveTowards(col.a,0,dt*4);
+                    if(pos.y>650){pos.y=-900;pos.x=UnityEngine.Random.Range(-510f,510f);col.a=0;}
+                    jackpotCoinRT[i].anchoredPosition=pos;
+                    jackpotCoinRT[i].GetComponent<Image>().color=col;
+                    // Spin
+                    jackpotCoinRT[i].localRotation=Quaternion.Euler(0,0,jackpotCoinRT[i].localRotation.eulerAngles.z+dt*360*(i%2==0?1:-1));
+                }
+                if(jackpotTime<=0)jackpotOverlay.SetActive(false);
+            }
             hudTimer-=dt;if(hudTimer>0)return;hudTimer=.1f;
             double prev=displayedCoins;
             displayedCoins=Math.Abs(displayedCoins-app.Wallet.Coins)<2?app.Wallet.Coins:displayedCoins+(app.Wallet.Coins-displayedCoins)*.35;
@@ -189,10 +295,12 @@ namespace LumaReef.UI
             float scale = 1f + Mathf.Clamp01((float)(displayedCoins - prev) / 1000f) * 0.4f;
             balance.transform.localScale = Vector3.Lerp(balance.transform.localScale, Vector3.one * scale, 0.4f);
             if (Mathf.Abs(balance.transform.localScale.x - 1f) < 0.02f) balance.transform.localScale = Vector3.one;
-            profile.text="ID: LUMA-0001       CẤP "+app.SaveData.level;avatar.sprite=app.Catalog.room.fish[(app.SaveData.selectedCosmetic&8)!=0?23:0].sprite;avatarFrame.color=(app.SaveData.selectedCosmetic&16)!=0?new Color(1,.4f,.85f):Color.white;
+            profile.text="ID: "+LumaReef.Network.DatabaseManager.CurrentUsername+"  |  CẤP "+app.SaveData.level;
+            avatar.sprite=app.Catalog.room.fish[(app.SaveData.selectedCosmetic&8)!=0?23:0].sprite;avatarFrame.color=(app.SaveData.selectedCosmetic&16)!=0?new Color(1,.4f,.85f):Color.white;
             bet.text="CƯỢC  "+app.Loadout.Bet;gunLabel.text="SÚNG CẤP "+(app.Loadout.Selected+1);autoLabel.color=app.Auto?Aqua:Color.white;lockLabel.color=app.Lock?Aqua:Color.white;
             for(int i=0;i<6;i++){float cd=app.Skills.Cooldown(i);skillButtons[i].interactable=cd<=0;skillLabels[i].text=cd>0?Mathf.CeilToInt(cd)+"s":app.Catalog.skills[i].displayName;}
-            var boss=app.Boss;bossRoot.SetActive(boss!=null);if(boss!=null){bossLabel.text=boss.Data.displayName.ToUpperInvariant()+"  /  "+Mathf.CeilToInt(boss.HP)+" HP";bossFill.rectTransform.localScale=new Vector3(Mathf.Clamp01(boss.HP/boss.Data.bossHP),1,1);}
+            var boss=app.Boss;bossRoot.SetActive(boss!=null);
+            if(boss!=null){bossLabel.text=boss.Data.displayName.ToUpperInvariant()+"  ⚔  CẤP NGUY HIỂM";bossFill.rectTransform.localScale=new Vector3(Mathf.Clamp01(boss.HP/Mathf.Max(1,boss.Data.bossHP)),1,1);}
             if(debug.activeSelf)fpsText.text="FPS "+Mathf.RoundToInt(1/Mathf.Max(.001f,dt))+" / FISH "+app.FishCount+"\nBOLTS "+app.BulletCount+" / VFX "+app.EffectCount+" / GOD "+app.Combat.GodMode;
         }
     }

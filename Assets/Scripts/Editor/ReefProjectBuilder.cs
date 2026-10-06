@@ -41,7 +41,7 @@ namespace LumaReef.Editor
                 catalog.disk=SpriteAsset("Assets/Art/Coins/Pearl.png",256,256,(x,y)=>{float d=new Vector2(x,y).magnitude; return d<.82f?(d>.65f?new Color(1,.73f,.2f):new Color(1,.95f,.55f)):Color.clear;});
                 catalog.ring=SpriteAsset("Assets/Art/VFX/Ring.png",256,256,(x,y)=>{float d=new Vector2(x,y).magnitude;return d>.74f&&d<.87f?Color.white:Color.clear;});
                 catalog.barrel=SpriteAsset("Assets/Art/Guns/Barrel.png",256,512,(x,y)=>Mathf.Abs(x)<.72f&&Mathf.Abs(y)<.9f?new Color(.68f+(.5f-x)*.2f,.92f,1):Color.clear);
-                catalog.background=SpriteAsset("Assets/Art/Background/LanternShoals.png",1920,1080,OceanPixel);
+                catalog.background=SpriteAsset("Assets/Art/Background/LanternShoals.png",2048,2048,OceanPixel);
                 catalog.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
                 var material=AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/VFX/ReefParticles.mat");
                 if(material==null) { material=new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit")); AssetDatabase.CreateAsset(material,"Assets/Art/VFX/ReefParticles.mat"); }
@@ -73,7 +73,7 @@ namespace LumaReef.Editor
                     f.special=i==19?SpecialEffect.Lantern:i==20?SpecialEffect.Bomb:i==21?SpecialEffect.Treasure:i==22?SpecialEffect.Lightning:i==23?SpecialEffect.Golden:SpecialEffect.None;
                     string art="Assets/Art/"+(i>=24?"Boss":"Fish")+"/"+f.id+".png";
                     // Độ phân giải siêu cao → ảnh sắc nét tuyệt đối
-                    f.sprite=SpriteAsset(art,768,512,(x,y)=>FishPixel(index,x,y,f.tint));
+                    f.sprite=SpriteAsset(art,1024,768,(x,y)=>FishPixel(index,x,y,f.tint));
                     f.animation=AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Art/Fish/Swim.asset");
                     if(f.animation==null){var clip=new AnimationClip();clip.name="Swim";clip.SetCurve("",typeof(Transform),"localScale.y",AnimationCurve.EaseInOut(0,1,.4f,1.035f));AssetDatabase.CreateAsset(clip,"Assets/Art/Fish/Swim.asset");f.animation=clip;}
                     FishPrefab(f); room.fish[i]=f; EditorUtility.SetDirty(f);
@@ -84,7 +84,7 @@ namespace LumaReef.Editor
                 {
                     var g=Asset<GunData>("Assets/ScriptableObjects/Guns/"+GunNames[i].Replace(" ","")+".asset");g.id="cannon-"+i;g.displayName=GunNames[i];g.level=i+1;g.bet=bets[i];
                     // Tất cả súng power = 1 (BÌNH ĐẲNG). Chỉ khác bet. Tăng fireRate nhẹ lên để bắn mượt và đã hơn.
-                    g.fireRate=4.8f;g.netRadius=0.75f;g.power=1;g.barrels=1;g.unlockCost=0;g.color=Color.HSVToRGB((.46f+i*.11f)%1,.72f,1);g.bullet=bullet;
+                    g.fireRate=6.5f;g.netRadius=0.75f;g.power=1;g.barrels=1;g.unlockCost=0;g.color=Color.HSVToRGB((.46f+i*.11f)%1,.72f,1);g.bullet=bullet;
                     g.body=catalog.disk;g.barrel=catalog.barrel;g.baseSprite=catalog.disk;g.fireSound=catalog.audio.cues[0];
                     g.muzzleFlash=SimplePrefab("Assets/Prefabs/VFX/Muzzle.prefab",catalog.disk);g.impactEffect=SimplePrefab("Assets/Prefabs/VFX/Impact.prefab",catalog.ring);g.netEffect=SimplePrefab("Assets/Prefabs/VFX/Net.prefab",catalog.ring);
                     SimplePrefab("Assets/Prefabs/Guns/"+g.id+".prefab",catalog.barrel);room.guns[i]=g;EditorUtility.SetDirty(g);
