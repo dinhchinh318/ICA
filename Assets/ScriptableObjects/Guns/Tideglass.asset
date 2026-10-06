@@ -15,13 +15,13 @@ MonoBehaviour:
   id: cannon-1
   displayName: Tideglass
   level: 2
-  bet: 5
+  bet: 10
   barrels: 1
-  unlockCost: 650
-  fireRate: 4.9
+  unlockCost: 0
+  fireRate: 5
   netRadius: 0.75
-  power: 1.5
-  color: {r: 0.38, g: 0.7396, b: 1, a: 1}
+  power: 1
+  color: {r: 0.27999997, g: 0.6976, b: 1, a: 1}
   bullet: {fileID: 11400000, guid: d0b0d945344de724c884dd1ff5cd2549, type: 2}
   body: {fileID: -5505979386996077736, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
   barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}

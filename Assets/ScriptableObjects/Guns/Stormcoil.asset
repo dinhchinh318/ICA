@@ -15,13 +15,13 @@ MonoBehaviour:
   id: cannon-4
   displayName: Stormcoil
   level: 5
-  bet: 25
+  bet: 100
   barrels: 1
-  unlockCost: 2600
-  fireRate: 6.1
-  netRadius: 1.14
-  power: 3
-  color: {r: 1, g: 0.38, b: 0.7520001, a: 1}
+  unlockCost: 0
+  fireRate: 5
+  netRadius: 0.75
+  power: 1
+  color: {r: 1, g: 0.27999997, b: 0.7120001, a: 1}
   bullet: {fileID: 11400000, guid: 7cefb625bd8ffbd4da30b4549acfbc8e, type: 2}
   body: {fileID: 343455990911918140, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
   barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}

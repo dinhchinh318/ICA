@@ -19,11 +19,11 @@ MonoBehaviour:
   animation: {fileID: 7400000, guid: d128e7d3c1031cc45aa25037770c15ae, type: 2}
   speed: 0.46
   multiplier: 200
-  killChance: 0.0045
+  killChance: 0.004
   hitboxScale: 0.85
-  size: 3.5
+  size: 4.5
   spawnWeight: 1
-  bossHP: 85
+  bossHP: 0
   coinReward: 200
   special: 0
   tint: {r: 0.361, g: 0.44817254, b: 0.95, a: 1}

@@ -58,22 +58,22 @@ namespace LumaReef.Editor
                     f.speed=i<6?1.3f:i<13?1.05f:i<24?.75f:.46f;
                     // Cá to hơn rõ ràng — nhìn ngầu hơn như iCá
                     if(f.category==FishCategory.Small)        f.size=1.2f;
-                    else if(f.category==FishCategory.Medium)  f.size=1.85f;
-                    else if(f.category==FishCategory.Large)   f.size=2.8f;
-                    else if(f.category==FishCategory.Special) f.size=2.6f;
-                    else                                       f.size=4.5f; // Boss rất to
-                    // killChance chuẩn casino: cá nhỏ dễ ăn, cá lớn cực khó, boss như nổ hũ
-                    if(f.category==FishCategory.Small)        f.killChance=0.25f;  // ~25% / viên đạn
-                    else if(f.category==FishCategory.Medium)  f.killChance=0.10f;  // ~10%
-                    else if(f.category==FishCategory.Large)   f.killChance=0.03f;  // ~3%
-                    else if(f.category==FishCategory.Special) f.killChance=0.02f;  // ~2%
-                    else                                       f.killChance=Mathf.Max(0.004f, 0.8f/multipliers[i]); // Boss: 0.4–0.8%
+                    else if(f.category==FishCategory.Medium)  f.size=2.2f;
+                    else if(f.category==FishCategory.Large)   f.size=3.4f;
+                    else if(f.category==FishCategory.Special) f.size=3.2f;
+                    else                                       f.size=5.5f; // Boss siêu to
+                    // killChance cực gắt: Khó như đánh bạc
+                    if(f.category==FishCategory.Small)        f.killChance=0.15f;  // 15% (bắn vài viên mới chết)
+                    else if(f.category==FishCategory.Medium)  f.killChance=0.035f; // 3.5%
+                    else if(f.category==FishCategory.Large)   f.killChance=0.008f; // 0.8%
+                    else if(f.category==FishCategory.Special) f.killChance=0.004f; // 0.4%
+                    else                                       f.killChance=Mathf.Max(0.001f, 0.15f/multipliers[i]); // Boss: cực khó
                     f.bossHP=0; // Không dùng HP — dùng tỉ lệ RNG thuần
                     f.hitboxScale=.85f; f.spawnWeight=1;
                     f.special=i==19?SpecialEffect.Lantern:i==20?SpecialEffect.Bomb:i==21?SpecialEffect.Treasure:i==22?SpecialEffect.Lightning:i==23?SpecialEffect.Golden:SpecialEffect.None;
                     string art="Assets/Art/"+(i>=24?"Boss":"Fish")+"/"+f.id+".png";
-                    // Độ phân giải cao hơn → ảnh nét hơn
-                    f.sprite=SpriteAsset(art,384,256,(x,y)=>FishPixel(index,x,y,f.tint));
+                    // Độ phân giải siêu cao → ảnh sắc nét tuyệt đối
+                    f.sprite=SpriteAsset(art,768,512,(x,y)=>FishPixel(index,x,y,f.tint));
                     f.animation=AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Art/Fish/Swim.asset");
                     if(f.animation==null){var clip=new AnimationClip();clip.name="Swim";clip.SetCurve("",typeof(Transform),"localScale.y",AnimationCurve.EaseInOut(0,1,.4f,1.035f));AssetDatabase.CreateAsset(clip,"Assets/Art/Fish/Swim.asset");f.animation=clip;}
                     FishPrefab(f); room.fish[i]=f; EditorUtility.SetDirty(f);
@@ -83,8 +83,8 @@ namespace LumaReef.Editor
                 for(int i=0;i<8;i++)
                 {
                     var g=Asset<GunData>("Assets/ScriptableObjects/Guns/"+GunNames[i].Replace(" ","")+".asset");g.id="cannon-"+i;g.displayName=GunNames[i];g.level=i+1;g.bet=bets[i];
-                    // Tất cả súng power = 1 (BÌNH ĐẲNG). Chỉ khác bet (tiền cược = tiền thắng)
-                    g.fireRate=5f;g.netRadius=0.75f;g.power=1;g.barrels=1;g.unlockCost=0;g.color=Color.HSVToRGB((.46f+i*.11f)%1,.72f,1);g.bullet=bullet;
+                    // Tất cả súng power = 1 (BÌNH ĐẲNG). Chỉ khác bet. Giảm fireRate để game chậm lại, ngắm bắn kĩ hơn.
+                    g.fireRate=3.2f;g.netRadius=0.75f;g.power=1;g.barrels=1;g.unlockCost=0;g.color=Color.HSVToRGB((.46f+i*.11f)%1,.72f,1);g.bullet=bullet;
                     g.body=catalog.disk;g.barrel=catalog.barrel;g.baseSprite=catalog.disk;g.fireSound=catalog.audio.cues[0];
                     g.muzzleFlash=SimplePrefab("Assets/Prefabs/VFX/Muzzle.prefab",catalog.disk);g.impactEffect=SimplePrefab("Assets/Prefabs/VFX/Impact.prefab",catalog.ring);g.netEffect=SimplePrefab("Assets/Prefabs/VFX/Net.prefab",catalog.ring);
                     SimplePrefab("Assets/Prefabs/Guns/"+g.id+".prefab",catalog.barrel);room.guns[i]=g;EditorUtility.SetDirty(g);

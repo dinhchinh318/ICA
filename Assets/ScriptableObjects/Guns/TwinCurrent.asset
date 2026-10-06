@@ -15,13 +15,13 @@ MonoBehaviour:
   id: cannon-3
   displayName: Twin Current
   level: 4
-  bet: 15
-  barrels: 2
-  unlockCost: 1950
-  fireRate: 5.7
-  netRadius: 1.01
-  power: 2.5
-  color: {r: 0.8388001, g: 0.38, b: 1, a: 1}
+  bet: 50
+  barrels: 1
+  unlockCost: 0
+  fireRate: 5
+  netRadius: 0.75
+  power: 1
+  color: {r: 0.8128001, g: 0.27999997, b: 1, a: 1}
   bullet: {fileID: 11400000, guid: 7cc0575567a328c4fa4922390a38721f, type: 2}
   body: {fileID: 8476749756178533168, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
   barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}

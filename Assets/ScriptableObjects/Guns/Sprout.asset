@@ -15,13 +15,13 @@ MonoBehaviour:
   id: cannon-0
   displayName: Sprout
   level: 1
-  bet: 2
+  bet: 5
   barrels: 1
   unlockCost: 0
-  fireRate: 4.5
-  netRadius: 0.62
+  fireRate: 5
+  netRadius: 0.75
   power: 1
-  color: {r: 0.38, g: 1, b: 0.85120004, a: 1}
+  color: {r: 0.27999997, g: 1, b: 0.82720006, a: 1}
   bullet: {fileID: 11400000, guid: f1a4f1e6035eb20479516e81e3dc250d, type: 2}
   body: {fileID: 4268019497869225575, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
   barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}

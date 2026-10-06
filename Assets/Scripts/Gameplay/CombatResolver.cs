@@ -88,17 +88,18 @@ namespace LumaReef.Gameplay
                     if(data.category == FishCategory.Boss || data.category == FishCategory.Special)
                     {
                         // Boss/Special: gacha 3 mức
-                        if(roll < 0.05)       reward = (long)(baseReward * 5.0); // 5%: Jackpot x5
-                        else if(roll < 0.20)  reward = (long)(baseReward * 2.5); // 15%: Mega x2.5
-                        else if(roll < 0.50)  reward = (long)(baseReward * 1.5); // 30%: Bonus x1.5
-                        // 50%: mức base bình thường
+                        // Boss/Special: gacha 3 mức, tỉ lệ cực thấp
+                        if(roll < 0.01)       reward = (long)(baseReward * 5.0); // 1%: Jackpot x5
+                        else if(roll < 0.05)  reward = (long)(baseReward * 2.5); // 4%: Mega x2.5
+                        else if(roll < 0.15)  reward = (long)(baseReward * 1.5); // 10%: Bonus x1.5
+                        // 85%: mức base bình thường
                     }
                     else
                     {
-                        // Cá lớn thường: gacha 2 mức
-                        if(roll < 0.10)       reward = (long)(baseReward * 2.0); // 10%: Bonus x2
-                        else if(roll < 0.30)  reward = (long)(baseReward * 1.3); // 20%: Bonus x1.3
-                        // 70%: mức base
+                        // Cá lớn thường: gacha 2 mức, tỉ lệ thấp
+                        if(roll < 0.03)       reward = (long)(baseReward * 2.0); // 3%: Bonus x2
+                        else if(roll < 0.10)  reward = (long)(baseReward * 1.3); // 7%: Bonus x1.3
+                        // 90%: mức base
                     }
                 }
                 

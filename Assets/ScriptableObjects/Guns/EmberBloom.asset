@@ -15,13 +15,13 @@ MonoBehaviour:
   id: cannon-5
   displayName: Ember Bloom
   level: 6
-  bet: 40
+  bet: 200
   barrels: 1
-  unlockCost: 3250
-  fireRate: 6.5
-  netRadius: 1.27
-  power: 3.5
-  color: {r: 1, g: 0.41720003, b: 0.38, a: 1}
+  unlockCost: 0
+  fireRate: 5
+  netRadius: 0.75
+  power: 1
+  color: {r: 1, g: 0.3232, b: 0.27999997, a: 1}
   bullet: {fileID: 11400000, guid: 02629d5c1011e1445955e6ec7c4d6d56, type: 2}
   body: {fileID: 5664376292832597102, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
   barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}
