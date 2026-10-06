@@ -42,7 +42,7 @@ namespace LumaReef.Gameplay
             for(int i=0;i<pool.Items.Length&&hits<room.chainTargets;i++)
             {
                 var f=pool.Items[i]; if(!f.Active||(f.Position-at).sqrMagnitude>room.chainRadius*room.chainRadius)continue;
-                Lightning?.Invoke(at,f.Position); combat.Hit(f,bet,power); hits++;
+                Lightning?.Invoke(at,f.Position); combat.Hit(f,bet); hits++;
             }
         }
     }
