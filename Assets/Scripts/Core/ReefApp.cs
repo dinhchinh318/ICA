@@ -72,7 +72,7 @@ namespace LumaReef.Core
             Skills=new SkillController(Catalog.skills); quests=new QuestController(SaveData,Catalog.quests,Wallet);
             world=new GameObject("Reef world").transform; world.SetParent(transform);
             var cameraGo=new GameObject("Reef Camera",typeof(Camera),typeof(AudioListener)); cameraGo.transform.SetParent(transform);
-            cameraView=cameraGo.GetComponent<Camera>(); cameraView.orthographic=true; cameraView.orthographicSize=8.5f; cameraView.backgroundColor=new Color(.02f,.09f,.17f); cameraView.transform.position=new Vector3(0,0,-10); cameraGo.tag="MainCamera";
+            cameraView=cameraGo.GetComponent<Camera>(); cameraView.orthographic=true; cameraView.orthographicSize=9.6f; cameraView.backgroundColor=new Color(.02f,.09f,.17f); cameraView.transform.position=new Vector3(0,0,-10); cameraGo.tag="MainCamera";
             cameraFX=new CameraFXManager(cameraView); BuildEnvironment();
             fish=new FixedPool<FishActor>(Catalog.room.maxFish,i=>new FishActor(world));
             bullets=new FixedPool<BulletActor>(Catalog.room.bulletCapacity,i=>new BulletActor(world,Catalog.disk,Catalog.particleMaterial));
@@ -190,14 +190,14 @@ namespace LumaReef.Core
         void OnBigWin(LumaReef.Data.FishData data,Vector2 at,long reward)
         {
             bool isJackpot = data.category==FishCategory.Boss;
-            // Hiệu ứng NỔ HŨ sống động
+            // Hiệu ứng NỔ HŨ sống động bùng nổ
             effects.Burst(at, isJackpot?3.5f:2f, ReefUI.Gold);
-            cameraFX.Pulse(isJackpot?.35f:.18f, isJackpot);
+            cameraFX.Pulse(isJackpot?1.2f:.18f, isJackpot);
             if(isJackpot)
             {
                 Audio.Play(SoundCue.Shower);
-                // Mưa vàng toàn màn hình
-                for(int i=0;i<8;i++) rewards.Play(new Vector2(UnityEngine.Random.Range(-4f,4f),UnityEngine.Random.Range(-6f,6f)),0,false);
+                // Mưa vàng toàn màn hình cực khủng
+                for(int i=0;i<35;i++) rewards.Play(new Vector2(UnityEngine.Random.Range(-5f,5f),UnityEngine.Random.Range(-7f,7f)),0,false);
                 ui.ShowJackpot(data.displayName, reward);
             }
             else
