@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 037fd2f93f157184f9fe9402e3b122d7, type: 3}
+  m_Name: LanternShoals
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Data.RoomData
+  displayName: Lantern Shoals
+  maxFish: 35
+  waveCount: 25
+  bulletCapacity: 96
+  effectCapacity: 128
+  coinCapacity: 96
+  textCapacity: 32
+  spawnInterval: 1.4
+  bossInterval: 65
+  waveInterval: 35
+  categoryWeights:
+  - 50
+  - 30
+  - 12
+  - 8
+  betSteps: 010000000200000005000000i
+  fish:
+  - {fileID: 11400000, guid: 93efab3309e533846b6dbd34eb14fad5, type: 2}
+  - {fileID: 11400000, guid: 54a122117d6bad9439453a0fd6264209, type: 2}
+  - {fileID: 11400000, guid: e4592fd61b1fb1c4ab9e5ca5cb25316d, type: 2}
+  - {fileID: 11400000, guid: ccb415a713c66994d9ed5886c57003ce, type: 2}
+  - {fileID: 11400000, guid: 1470106cadff91746bca6049259c5578, type: 2}
+  - {fileID: 11400000, guid: ac8b4b7b9d999c245b4889b84ccc3392, type: 2}
+  - {fileID: 11400000, guid: b4ddc29d8ad8baa4a9107e01ea2c042c, type: 2}
+  - {fileID: 11400000, guid: dec243853e312a149be5acd80571b3b6, type: 2}
+  - {fileID: 11400000, guid: 9aadfabc891e1e044ae02e118b4fd3f1, type: 2}
+  - {fileID: 11400000, guid: 906e06afd8bf08d4bacb00f55176acb2, type: 2}
+  - {fileID: 11400000, guid: 58b7c0c4280094443bdf834ffcd06bc0, type: 2}
+  - {fileID: 11400000, guid: 565ab93439caaad4eb45822c2dc487e6, type: 2}
+  - {fileID: 11400000, guid: 55d6a88725233aa49a267f6add0ae0ce, type: 2}
+  - {fileID: 11400000, guid: eecd990ab44720e4e8c4d2e6886519c8, type: 2}
+  - {fileID: 11400000, guid: ac9e5eb4e6827bc4c9705c3c827de178, type: 2}
+  - {fileID: 11400000, guid: 55317740b7006744fa9b4be1be6ed0b2, type: 2}
+  - {fileID: 11400000, guid: 3ad5fb8f97beb0748b3de3d4455fc155, type: 2}
+  - {fileID: 11400000, guid: df6ff5575d1afd64699534e3098df892, type: 2}
+  - {fileID: 11400000, guid: e763d2a10471174408e3b0ca086a1cbe, type: 2}
+  - {fileID: 11400000, guid: 9f82250de0d96bf4ca3bbdbe4c6c809f, type: 2}
+  - {fileID: 11400000, guid: 74cd63f85c099634aa6bd0858dd402a0, type: 2}
+  - {fileID: 11400000, guid: c89bfb2209ec693469ca29108732091a, type: 2}
+  - {fileID: 11400000, guid: 84c5c54645c9b274c95822a55d3438e2, type: 2}
+  - {fileID: 11400000, guid: 66bdd0d36027df844aee58a580b7b6a3, type: 2}
+  - {fileID: 11400000, guid: 3afcfd222ae0e4040981a54336d5de93, type: 2}
+  - {fileID: 11400000, guid: 56c66d80600bd8b44a33f051f7eeee7c, type: 2}
+  - {fileID: 11400000, guid: 4d40aa93052f69d41877cd3624b8d096, type: 2}
+  - {fileID: 11400000, guid: 6608deeb8d6c93646976d5778bf5cc84, type: 2}
+  guns:
+  - {fileID: 11400000, guid: 803812f2490713e43a0370ebd2c3f88f, type: 2}
+  - {fileID: 11400000, guid: d90e42a3fec0a6b43b55b1eff6478f9d, type: 2}
+  - {fileID: 11400000, guid: 752be1833f6068e42a4f643f392230d8, type: 2}
+  - {fileID: 11400000, guid: 0658e5c93b8a0a84d851ee1c9a0d945a, type: 2}
+  - {fileID: 11400000, guid: 86639d590cd174245ad1c7fbeb4808bd, type: 2}
+  - {fileID: 11400000, guid: 41d68e14b60ec7b4d854a2e514651e7e, type: 2}
+  - {fileID: 11400000, guid: 14225479c62bb9648ae724cde78260e8, type: 2}
+  - {fileID: 11400000, guid: 539d600591b54d34ba3f8126324fa462, type: 2}
+  paths:
+  - {fileID: 11400000, guid: 95fc9a2b7d32b8246b7c94a7371105fb, type: 2}
+  - {fileID: 11400000, guid: e0b2911cb85ca0140b84485074d3597a, type: 2}
+  - {fileID: 11400000, guid: 4c7dd4a607cd68a45ad528a00c452b7e, type: 2}
+  - {fileID: 11400000, guid: d0c9eb82f72664b42afa6d33ddd4eb71, type: 2}
+  - {fileID: 11400000, guid: e5162e56a887c014b8f429e68ed770fa, type: 2}
+  - {fileID: 11400000, guid: 7e0ce778fb78eae40852583ffb23ae5e, type: 2}
+  - {fileID: 11400000, guid: 5e890991d07088147a18d4c2107151b8, type: 2}
+  - {fileID: 11400000, guid: de067a51b000d1f4faf7748d0156ac85, type: 2}
+  - {fileID: 11400000, guid: ab22ed5e1614c184cac5b2e353587342, type: 2}
+  - {fileID: 11400000, guid: 1e345419e0721684bac93b0edc716d8b, type: 2}
+  - {fileID: 11400000, guid: f1324cda99baf974783bb058038c4181, type: 2}
+  - {fileID: 11400000, guid: aa46092183cbfcb4ab67b8579fc0ad83, type: 2}
+  - {fileID: 11400000, guid: 6274f956a93de684facf8ac07f7e517d, type: 2}
+  - {fileID: 11400000, guid: c4691a659d88a8741abe2317de594b5d, type: 2}
+  - {fileID: 11400000, guid: 2d7fcc5d79117e044b1c75dc46e99717, type: 2}
+  - {fileID: 11400000, guid: 787988e2a156cdc4f95bb527a4e47e2d, type: 2}
+  - {fileID: 11400000, guid: da6f3046e61f0064bbdbff352cf0360f, type: 2}
+  - {fileID: 11400000, guid: 97a3795347ce9b246bf2021deabd2987, type: 2}
+  - {fileID: 11400000, guid: c66a52f8adeb23b469469dc9f23d4657, type: 2}
+  - {fileID: 11400000, guid: 0f62a679c0f92ef4db8d91c6def0fa5e, type: 2}
+  - {fileID: 11400000, guid: 876dbe4c8fa2d3c47924f90b3a9d879e, type: 2}
+  specialRadius: 2.5
+  specialPower: 2
+  chainRadius: 4
+  chainTargets: 5
+  initialCoins: 5000
+  initialDiamonds: 25

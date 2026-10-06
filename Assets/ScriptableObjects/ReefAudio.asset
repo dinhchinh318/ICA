@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46dbaaa969d199d418fc06db8aa6c9bd, type: 3}
+  m_Name: ReefAudio
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Data.AudioLibrary
+  cues:
+  - {fileID: 8300000, guid: f8326256ed655c04fb7117992bb2c682, type: 3}
+  - {fileID: 8300000, guid: 161f738006cad1543ab4b8395aefed08, type: 3}
+  - {fileID: 8300000, guid: 787f42a1e984b114aab6ec370b4a827d, type: 3}
+  - {fileID: 8300000, guid: 318560b99bf392240ba37990b38b3281, type: 3}
+  - {fileID: 8300000, guid: ce07e33228aeecb42b580a98e5999ce3, type: 3}
+  - {fileID: 8300000, guid: c90c827587c9a9842973e9f187522c36, type: 3}
+  - {fileID: 8300000, guid: 44d7791056a5cc24c96cd3b4ea15c105, type: 3}
+  - {fileID: 8300000, guid: 094280ab31e67864a811c7928661322f, type: 3}
+  - {fileID: 8300000, guid: 50d0bd04c17b21a419aece491c044e2e, type: 3}
+  - {fileID: 8300000, guid: 82c1a258427d9174e9431a5f46e7607b, type: 3}
+  - {fileID: 8300000, guid: af45d15d46e1262418e3d61ded227338, type: 3}
+  reefMusic: {fileID: 8300000, guid: 75dd5397391de8c48bb5cd644b648bc8, type: 3}
+  bossMusic: {fileID: 8300000, guid: 19922a5cf0ae44849bbe954f87769ea9, type: 3}
+  mixer: {fileID: 24100000, guid: 3ba310a968eaace40bef078a05aefccb, type: 2}
+  musicGroup: {fileID: 954133914426495395, guid: 3ba310a968eaace40bef078a05aefccb, type: 2}
+  sfxGroup: {fileID: 4495959610976986479, guid: 3ba310a968eaace40bef078a05aefccb, type: 2}

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c26449e8c54d88b42a9780da9ada92e0, type: 3}
+  m_Name: Mission4
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Data.QuestData
+  id: daily-4
+  description: Fire 500 bolts
+  metric: 4
+  target: 500
+  reward: 1100

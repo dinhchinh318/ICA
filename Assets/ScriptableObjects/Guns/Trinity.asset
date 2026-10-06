@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40120da3c954c37499a3edde95556461, type: 3}
+  m_Name: Trinity
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Data.GunData
+  id: cannon-6
+  displayName: Trinity
+  level: 7
+  bet: 60
+  barrels: 3
+  unlockCost: 3900
+  fireRate: 6.9
+  netRadius: 1.4
+  power: 4
+  color: {r: 1, g: 0.82640004, b: 0.38, a: 1}
+  bullet: {fileID: 11400000, guid: 92a71f7885ce5ef4494ae5040ea85ec8, type: 2}
+  body: {fileID: 8065387976645432743, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}
+  baseSprite: {fileID: 21300000, guid: 835490605ff31b241b7e6f770e57cb82, type: 3}
+  muzzleFlash: {fileID: 1433054812159641576, guid: df18603e8e209ad47bdb2ed4fa423c33, type: 3}
+  impactEffect: {fileID: 4950165835373904796, guid: 895de4cfda566de40afe7ee39f004fcf, type: 3}
+  netEffect: {fileID: 9123669768780224733, guid: a47734bfa4a6cc1428a263d3ec398411, type: 3}
+  fireSound: {fileID: 8300000, guid: f8326256ed655c04fb7117992bb2c682, type: 3}

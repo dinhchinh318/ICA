@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70502d55fbed49b4fa5685d18a029422, type: 3}
+  m_Name: ReefCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Data.ReefCatalog
+  room: {fileID: 11400000, guid: 26db21c1542a39046b98d372e0b64286, type: 2}
+  skills:
+  - {fileID: 11400000, guid: 3ec178f289a9b6e4f98c684385fc4110, type: 2}
+  - {fileID: 11400000, guid: 39ebff357a8bf01499916ed9bfb81ad1, type: 2}
+  - {fileID: 11400000, guid: 1eade551078a9a043bec5e439e588b41, type: 2}
+  - {fileID: 11400000, guid: a93a7b7aa22602343b3a6c0d21c5c0f0, type: 2}
+  - {fileID: 11400000, guid: a448fde83fc74c34f86b344b6a42db3d, type: 2}
+  - {fileID: 11400000, guid: eaae9d9fe69faf744957e873e052cf2e, type: 2}
+  quests:
+  - {fileID: 11400000, guid: 41814c31e6951c649a84fbab445e6d20, type: 2}
+  - {fileID: 11400000, guid: a99c0179d7c9c1045a4fd7527340c0ff, type: 2}
+  - {fileID: 11400000, guid: af9053caa5d8823408fd480b775fd3b6, type: 2}
+  - {fileID: 11400000, guid: eea0767c14ccc564789766c14138f7b2, type: 2}
+  - {fileID: 11400000, guid: 8219163796f8f9a48b35f6ee557d1ce5, type: 2}
+  - {fileID: 11400000, guid: 5490e4cded8ab66458121ce3f6a21033, type: 2}
+  audio: {fileID: 11400000, guid: 1c8157d7e0f66844c89c4bd81c275fd4, type: 2}
+  disk: {fileID: 21300000, guid: 835490605ff31b241b7e6f770e57cb82, type: 3}
+  barrel: {fileID: 21300000, guid: fbf293cd1b198e6479dece5f2752aafb, type: 3}
+  background: {fileID: 21300000, guid: b66ff60b580fbe4428ede2605b604f2c, type: 3}
+  ring: {fileID: 21300000, guid: 4de40d949e6fa184ebabfd5188964948, type: 3}
+  particleMaterial: {fileID: 2100000, guid: 1f6ef41bb8968fc4687e760cd96c29a0, type: 2}
+  font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+  lobbyBackground: {fileID: 21300000, guid: 2f8c3828a5f3f6f4193262f8d193a8b2, type: 3}
+  uiIcons:
+  - {fileID: 4268019497869225575, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -5505979386996077736, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -3376589393737276334, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: 8476749756178533168, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: 343455990911918140, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: 5664376292832597102, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: 8065387976645432743, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -938141809282009477, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -3915856597774690101, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -6219206072634005875, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -6978476258865563943, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -6355543179162753977, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -2957914448704842028, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -841707882996868880, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: -7834715965086406295, guid: 6072043e84198d94e85342170115d679, type: 3}
+  - {fileID: 2790557054101403062, guid: 6072043e84198d94e85342170115d679, type: 3}
+  cannonSprites:
+  - {fileID: 4268019497869225575, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: -5505979386996077736, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: -3376589393737276334, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: 8476749756178533168, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: 343455990911918140, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: 5664376292832597102, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: 8065387976645432743, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  - {fileID: -938141809282009477, guid: 1b9e785dd263d1a459d8174267fd2e97, type: 3}
+  effectSprites:
+  - {fileID: 4268019497869225575, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: -5505979386996077736, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: -3376589393737276334, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: 8476749756178533168, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: 343455990911918140, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: 5664376292832597102, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: 8065387976645432743, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  - {fileID: -938141809282009477, guid: fc517ad1cc7bbb24c88cb2c9ecfcd462, type: 3}
+  uiSkins:
+  - {fileID: 4268019497869225575, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: -5505979386996077736, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: -3376589393737276334, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: 8476749756178533168, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: 343455990911918140, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: 5664376292832597102, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: 8065387976645432743, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: -938141809282009477, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}
+  - {fileID: -3915856597774690101, guid: 2bc6336c23288594b8acc849cdd16dce, type: 3}

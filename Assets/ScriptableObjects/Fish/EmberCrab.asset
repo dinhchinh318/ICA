@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 171c795005988cd4ca6cc9f5310e5ede, type: 3}
+  m_Name: EmberCrab
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Data.FishData
+  id: resident-20
+  displayName: Ember Crab
+  category: 3
+  sprite: {fileID: 6953114498715899322, guid: 16897cb6cf90af941998112418a2454e, type: 3}
+  animation: {fileID: 7400000, guid: d128e7d3c1031cc45aa25037770c15ae, type: 2}
+  speed: 0.75
+  multiplier: 18
+  killChance: 0.049999997
+  hitboxScale: 0.85
+  size: 1.9
+  spawnWeight: 1
+  bossHP: 0
+  coinReward: 18
+  special: 2
+  tint: {r: 0.90287954, g: 0.361, b: 0.95, a: 1}

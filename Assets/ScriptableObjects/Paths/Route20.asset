@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa3cb522395ee7e458f7456760c1da62, type: 3}
+  m_Name: Route20
+  m_EditorClassIdentifier: Assembly-CSharp::LumaReef.Path.BezierPath
+  kind: 6
+  points:
+  - {x: -7.5, y: 3.06}
+  - {x: -7.1875, y: 3.06}
+  - {x: -7.4416666, y: 3.57}
+  - {x: -5.625, y: 3.06}
+  - {x: -3.8083334, y: 2.55}
+  - {x: 2.8101609, y: 0.28402045}
+  - {x: 3.4, y: 0}
+  - {x: 3.9898393, y: -0.28402045}
+  - {x: -1.5192983, y: 1.6267105}
+  - {x: -2.085965, y: 1.3558772}
+  - {x: -2.6526315, y: 1.0850438}
+  - {x: -0.5892556, y: -1.5560571}
+  - {x: 0.000000029812202, y: -1.625}
+  - {x: 0.5892557, y: -1.6939429}
+  - {x: 1.7162356, y: 0.6713865}
+  - {x: 1.449569, y: 0.9422198}
+  - {x: 1.1829023, y: 1.2130531}
+  - {x: -2.2959054, y: -0.3529634}
+  - {x: -1.6000001, y: -0.000000024803754}
+  - {x: -0.90409493, y: 0.35296333}
+  - {x: 4.108333, y: 2.55}
+  - {x: 5.625, y: 3.06}
+  - {x: 7.141667, y: 3.57}
+  - {x: 7.1875, y: 3.06}
+  - {x: 7.5, y: 3.06}
+  length: 37.460266

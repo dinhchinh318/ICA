@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ReefAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 0
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 77ea8ffc666f34444adcb2cdf91d1e50, type: 3}
+    - {fileID: 102900000, guid: d8c070d50fd4e894d9c99ed6777b0955, type: 3}
+    - {fileID: 102900000, guid: 29097cd42d2a5be40ab2a0dc4315594f, type: 3}
+    - {fileID: 102900000, guid: d095dafa1cab9f44899b55f667130739, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 835490605ff31b241b7e6f770e57cb82: 21300000
+    - a4d04cb0da633ab4ba33b39822a24c1c: 21300000
+    - 671cb0229feb4c24c90ca7b9a2ffb966: 21300000
+    - 8cf26d329f4d639459bc9da394303a95: 21300000
+    - 3e5b44d2256c1e74199534e98469204e: 21300000
+    - 5c7f4153009b59943a069429c29a7489: 21300000
+    - 9884e083e91769a4d8c6b72085465d86: 21300000
+    - f05a2bb30558e1049a1f354f67c4762c: 21300000
+    - d9d22ac35b6b0cb4d9599bae8048e2fe: 21300000
+    - a7e0a6e432e00b140952f23b5cd8b04f: 21300000
+    - 42c112858cb6d034e81aa80820fe2449: 21300000
+    - 2c516806c8578be4f9c0dd08d69d7f9d: 21300000
+    - 11b42756f8c34634296e592c2ba76d2a: 21300000
+    - 674f3a968e350644f9888cdba16e3c5f: 21300000
+    - 58205ed6d37746f4db6fe8f212c3dc41: 21300000
+    - b404cf18d62dec149813688660e41dee: 21300000
+    - bc11932814bf1ee4c8de93070e34ebc1: 21300000
+    - d96267097b57a75419b3806428730482: 21300000
+    - d80a0b1a71d422b42a900a46bdbcfe38: 21300000
+    - a4be4d6ac69e70642b5d254968e132a9: 21300000
+    - a45871ac0f0e18840a293a9c6d666fac: 21300000
+    - fbf293cd1b198e6479dece5f2752aafb: 21300000
+    - 4ed48d3e908da7545ab17e35c34f3396: 21300000
+    - b587c97eaa73971479ea442dd80ac0d5: 21300000
+    - d9e7a48ef7d1dab4f8a44ff3de0d248e: 21300000
+    - e343279e4602abe4c8b9e962f94f6d1d: 21300000
+    - 8b615cbeced82a14da4303ab5717c6bc: 21300000
+    - 829d25ce4edd0574696d23753303c4ee: 21300000
+    - e2b7088f533f0db48a0f680d1bac3f8b: 21300000
+    - 81b687cf277efd946b9cf1643dd2009f: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_RenderDataMap: {}
+  m_Tag: ReefAtlas
+  m_IsVariant: 0
+  m_Guid: d73ed59700f4a134f959ea0b9617a71b
