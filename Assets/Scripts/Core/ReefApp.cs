@@ -85,6 +85,7 @@ namespace LumaReef.Core
             ui=new ReefUI(this,Catalog.font);
             Wallet.Changed+=()=>dirty=true;
             Combat.Killed+=OnKilled;Combat.Impact+=(at,radius,color)=>{effects.Net(at,radius,color,Loadout.Current.level);Audio.Play(SoundCue.Hit);};
+            Combat.BigWin+=OnBigWin;
             specials.Lightning+=(from,to)=>{effects.Lightning(from,to); Audio.Play(SoundCue.Lightning);};
             specials.Treasure+=(at,reward)=>{rewards.Play(at,reward,true); effects.Burst(at,1.5f,ReefUI.Gold); quests.Add(QuestMetric.Earnings,reward); ui.Toast("TREASURE FOUND  +"+reward.ToString("N0"));};
             spawner.Announcement+=value=>{ui.Announce(value); if(spawner.HasBoss){Audio.Play(SoundCue.Warning); cameraFX.Pulse(.13f); effects.Burst(new Vector2(0,3),3,ReefUI.Gold);}};
@@ -174,7 +175,7 @@ namespace LumaReef.Core
             if((SaveData.selectedCosmetic&32)!=0)effects.Burst(at,data.size*.6f,new Color(1,.4f,.85f));
             Audio.Play(boss?SoundCue.BossDeath:SoundCue.Death); Audio.Play(boss?SoundCue.Shower:SoundCue.Coin);
             if(data.category>=FishCategory.Large)cameraFX.Pulse(boss?.28f:data.category==FishCategory.Special?.12f:.045f,boss);
-            if(boss)ui.Announce("SPECTACULAR CATCH!   +"+reward.ToString("N0"));
+            if(boss)cameraFX.Pulse(.28f,true); // Big win announce handled by OnBigWin
             quests.Add(QuestMetric.Fish,1); quests.Add(QuestMetric.Earnings,reward);
             if(data.category==FishCategory.Small)quests.Add(QuestMetric.Small,1);
             if(data.category==FishCategory.Large)quests.Add(QuestMetric.Large,1);
@@ -182,6 +183,22 @@ namespace LumaReef.Core
             SaveData.lifetimeKills++; SaveData.exp+=boss?100:5;
             while(SaveData.exp>=SaveData.level*100) { SaveData.exp-=SaveData.level*100; SaveData.level++; Wallet.AddDiamonds(2); }
             dirty=true;
+        }
+        void OnBigWin(LumaReef.Data.FishData data,Vector2 at,long reward)
+        {
+            bool isJackpot = data.category==FishCategory.Boss;
+            // Hiệu ứng NỔ HŨ sống động
+            effects.Burst(at, isJackpot?3.5f:2f, ReefUI.Gold);
+            cameraFX.Pulse(isJackpot?.35f:.18f, isJackpot);
+            if(isJackpot)
+            {
+                Audio.Play(SoundCue.Shower);
+                ui.Announce($"🎊 NỔ HŨ!  {data.displayName.ToUpperInvariant()}  +{reward.ToString("N0")} 🎊");
+            }
+            else
+            {
+                ui.Announce($"✨ THẮNG LỚN!  {data.displayName.ToUpperInvariant()}  +{reward.ToString("N0")}");
+            }
         }
         void OnSkill(SkillData data)
         {
@@ -252,7 +269,7 @@ namespace LumaReef.Core
                 case 2:spawner.Spawn(FishCategory.Large);break;
                 case 3:spawner.Spawn(FishCategory.Special);break;
                 case 4:spawner.Spawn(FishCategory.Boss);break;
-                case 5:bool old=Combat.GodMode;Combat.GodMode=true;for(int i=0;i<fish.Items.Length;i++)if(fish.Items[i].Active)Combat.Hit(fish.Items[i],Loadout.Bet,1);Combat.GodMode=old;break;
+                case 5:bool old=Combat.GodMode;Combat.GodMode=true;for(int i=0;i<fish.Items.Length;i++)if(fish.Items[i].Active)Combat.Hit(fish.Items[i],Loadout.Bet);Combat.GodMode=old;break;
                 case 6:Wallet.Credit(Catalog.room.guns[(Loadout.Selected+1)%8].unlockCost);Loadout.Purchase((Loadout.Selected+1)%8,Wallet);break;
                 case 7:Loadout.ChangeBet(Loadout.BetIndex==2?-2:1);break;
                 case 8:Combat.GodMode=!Combat.GodMode;break;

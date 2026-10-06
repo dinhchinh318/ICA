@@ -56,7 +56,14 @@ namespace LumaReef.Editor
                     f.id="resident-"+i; f.displayName=FishNames[i]; f.category=i<6?FishCategory.Small:i<13?FishCategory.Medium:i<19?FishCategory.Large:i<24?FishCategory.Special:FishCategory.Boss;
                     f.tint=Color.HSVToRGB((i*.137f+.08f)%1,.62f,.95f); f.multiplier=multipliers[i]; f.coinReward=Mathf.RoundToInt(multipliers[i]);
                     f.speed=i<6?1.3f:i<13?1.05f:i<24?.75f:.46f; f.size=i<6?.8f:i<13?1.25f:i<24?1.9f:3.5f;
-                    f.killChance=Mathf.Min(.6f,.9f/multipliers[i]); f.bossHP=i<24?0:45+(i-24)*20; f.hitboxScale=.85f; f.spawnWeight=1;
+                    // killChance chuẩn casino: cá nhỏ dễ ăn, cá lớn cực khó, boss như nổ hũ
+                    if(f.category==FishCategory.Small)        f.killChance=0.25f;  // ~25% / viên đạn
+                    else if(f.category==FishCategory.Medium)  f.killChance=0.10f;  // ~10%
+                    else if(f.category==FishCategory.Large)   f.killChance=0.03f;  // ~3%
+                    else if(f.category==FishCategory.Special) f.killChance=0.02f;  // ~2%
+                    else                                       f.killChance=Mathf.Max(0.004f, 0.8f/multipliers[i]); // Boss: 0.4–0.8%
+                    f.bossHP=0; // Không dùng HP — dùng tỉ lệ RNG thuần
+                    f.hitboxScale=.85f; f.spawnWeight=1;
                     f.special=i==19?SpecialEffect.Lantern:i==20?SpecialEffect.Bomb:i==21?SpecialEffect.Treasure:i==22?SpecialEffect.Lightning:i==23?SpecialEffect.Golden:SpecialEffect.None;
                     string art="Assets/Art/"+(i>=24?"Boss":"Fish")+"/"+f.id+".png";
                     f.sprite=SpriteAsset(art,192,128,(x,y)=>FishPixel(index,x,y,f.tint));
@@ -65,10 +72,12 @@ namespace LumaReef.Editor
                     FishPrefab(f); room.fish[i]=f; EditorUtility.SetDirty(f);
                 }
                 var bullet=Asset<BulletData>("Assets/ScriptableObjects/EnergyBolt.asset"); bullet.speed=14;bullet.bounces=1;bullet.sprite=catalog.disk;bullet.prefab=SimplePrefab("Assets/Prefabs/Bullets/EnergyBolt.prefab",catalog.disk);
-                room.guns=new GunData[8]; int[] bets={2,5,10,15,25,40,60,100};
+                room.guns=new GunData[8]; int[] bets={5,10,20,50,100,200,500,1000};
                 for(int i=0;i<8;i++)
                 {
-                    var g=Asset<GunData>("Assets/ScriptableObjects/Guns/"+GunNames[i].Replace(" ","")+".asset");g.id="cannon-"+i;g.displayName=GunNames[i];g.level=i+1;g.bet=bets[i];g.fireRate=4.5f+i*.4f;g.netRadius=.62f+i*.13f;g.power=1+i*.5f;g.barrels=i==3?2:i==6?3:1;g.unlockCost=i*650;g.color=Color.HSVToRGB((.46f+i*.11f)%1,.62f,1);g.bullet=bullet;
+                    var g=Asset<GunData>("Assets/ScriptableObjects/Guns/"+GunNames[i].Replace(" ","")+".asset");g.id="cannon-"+i;g.displayName=GunNames[i];g.level=i+1;g.bet=bets[i];
+                    // Tất cả súng power = 1 (BÌNH ĐẲNG). Chỉ khác bet (tiền cược = tiền thắng)
+                    g.fireRate=5f;g.netRadius=0.75f;g.power=1;g.barrels=1;g.unlockCost=0;g.color=Color.HSVToRGB((.46f+i*.11f)%1,.72f,1);g.bullet=bullet;
                     g.body=catalog.disk;g.barrel=catalog.barrel;g.baseSprite=catalog.disk;g.fireSound=catalog.audio.cues[0];
                     g.muzzleFlash=SimplePrefab("Assets/Prefabs/VFX/Muzzle.prefab",catalog.disk);g.impactEffect=SimplePrefab("Assets/Prefabs/VFX/Impact.prefab",catalog.ring);g.netEffect=SimplePrefab("Assets/Prefabs/VFX/Net.prefab",catalog.ring);
                     SimplePrefab("Assets/Prefabs/Guns/"+g.id+".prefab",catalog.barrel);room.guns[i]=g;EditorUtility.SetDirty(g);
@@ -103,7 +112,17 @@ namespace LumaReef.Editor
                 for(int y=0;y<height;y++)for(int x=0;x<width;x++)colors[y*width+x]=pixel((x+.5f)/width*2-1,(y+.5f)/height*2-1);
                 texture.SetPixels(colors);texture.Apply();File.WriteAllBytes(path,texture.EncodeToPNG());UnityEngine.Object.DestroyImmediate(texture);
             }
-            AssetDatabase.ImportAsset(path);var importer=(TextureImporter)AssetImporter.GetAtPath(path);importer.textureType=TextureImporterType.Sprite;importer.spritePixelsPerUnit=width;importer.spriteImportMode=SpriteImportMode.Single;importer.alphaIsTransparency=true;importer.mipmapEnabled=false;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.filterMode=FilterMode.Bilinear;importer.SaveAndReimport();
+            AssetDatabase.ImportAsset(path);var importer=(TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType=TextureImporterType.Sprite;importer.spritePixelsPerUnit=width;importer.spriteImportMode=SpriteImportMode.Single;
+            importer.alphaIsTransparency=true;importer.mipmapEnabled=false;
+            // Chất lượng ảnh tối đa để game NHÌN NÉT
+            importer.textureCompression=TextureImporterCompression.Uncompressed;
+            importer.filterMode=FilterMode.Bilinear;
+            importer.maxTextureSize=4096;
+            var platformSettings=importer.GetDefaultPlatformTextureSettings();
+            platformSettings.maxTextureSize=4096;platformSettings.textureCompression=TextureImporterCompression.Uncompressed;
+            importer.SetPlatformTextureSettings(platformSettings);
+            importer.SaveAndReimport();
             return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
         static Color FishPixel(int i,float x,float y,Color tint)
