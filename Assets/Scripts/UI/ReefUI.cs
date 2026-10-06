@@ -21,7 +21,9 @@ namespace LumaReef.UI
         readonly Button[] skillButtons=new Button[6];
         readonly Image bossFill,avatar,avatarFrame;
         double displayedCoins;
-        float eventTime,toastTime,hudTimer;
+        float eventTime,toastTime,hudTimer,jackpotTime;
+        GameObject jackpotOverlay;
+        Text jackpotTitle,jackpotAmount;
         public bool ModalOpen=>modal.activeSelf;
         public bool DebugOpen=>debug.activeSelf;
         public ReefUI(ReefApp app,Font font)
@@ -101,6 +103,15 @@ namespace LumaReef.UI
             loading=Panel(root,"Loading",0,0,1080,1920,Ink,true).gameObject;Icon(loading.transform,14,0,110,280);
             Label(loading.transform,"ĐANG KHÁM PHÁ ĐẠI DƯƠNG…",0,-127,970,130,34,Aqua);
             modal.SetActive(false);debug.SetActive(false);loading.SetActive(false);bossRoot.SetActive(false);ShowMenu(true);
+            // Jackpot overlay toàn màn hình
+            jackpotOverlay=Panel(root,"Jackpot overlay",0,0,1080,1920,new Color(0,.01f,.06f,.92f),false).gameObject;
+            var glow=Panel(jackpotOverlay.transform,"Glow",0,120,920,440,new Color(.7f,.5f,.05f,.18f)).gameObject;
+            Label(jackpotOverlay.transform,"🎊 NỔ HŨ! 🎊",0,380,960,140,72,new Color(1,.92f,.1f));
+            jackpotTitle=Label(jackpotOverlay.transform,"",0,190,960,110,46,Color.white);
+            Label(jackpotOverlay.transform,"PHẦN THƯỞNG",0,90,700,72,32,new Color(.8f,.85f,1f));
+            jackpotAmount=Label(jackpotOverlay.transform,"",0,-50,960,130,66,new Color(1,.92f,.1f));
+            Label(jackpotOverlay.transform,"CHÚC MỪNG!",0,-200,700,80,34,Gold);
+            jackpotOverlay.SetActive(false);
         }
         RectTransform Panel(Transform parent,string name,float x,float y,float w,float h,Color color,bool blocks=false)
         {var go=new GameObject(name,typeof(RectTransform),typeof(Image));var rt=(RectTransform)go.transform;rt.SetParent(parent,false);rt.anchoredPosition=new Vector2(x,y);rt.sizeDelta=new Vector2(w,h);var image=go.GetComponent<Image>();image.color=color;image.raycastTarget=blocks;return rt;}
@@ -143,6 +154,12 @@ namespace LumaReef.UI
         public void Loading(bool value)=>loading.SetActive(value);
         public void Announce(string value){eventText.text=value;eventTime=5;}
         public void Toast(string value){toast.text=value;toastTime=3;}
+        public void ShowJackpot(string fishName,long reward)
+        {
+            jackpotTitle.text=fishName.ToUpperInvariant();
+            jackpotAmount.text="+ "+reward.ToString("N0")+" VÀNG";
+            jackpotOverlay.SetActive(true); jackpotTime=3.5f;
+        }
         public void ToggleDebug()=>debug.SetActive(!debug.activeSelf);
         public void CloseModal(){modal.SetActive(false);app.Resume();}
         public void BeginPanel(string title,string subtitle)
@@ -161,6 +178,8 @@ namespace LumaReef.UI
         public void Tick(float dt)
         {
             if(eventTime>0&&(eventTime-=dt)<=0)eventText.text="";if(toastTime>0&&(toastTime-=dt)<=0)toast.text="";
+            // Auto-dismiss jackpot
+            if(jackpotTime>0){jackpotTime-=dt;if(jackpotTime<=0)jackpotOverlay.SetActive(false);}
             hudTimer-=dt;if(hudTimer>0)return;hudTimer=.1f;
             displayedCoins=Math.Abs(displayedCoins-app.Wallet.Coins)<2?app.Wallet.Coins:displayedCoins+(app.Wallet.Coins-displayedCoins)*.35;
             string value=((long)displayedCoins).ToString("N0");balance.text=value;menuBalance.text=value;gemBalance.text=menuGems.text=app.Wallet.Diamonds.ToString("N0");

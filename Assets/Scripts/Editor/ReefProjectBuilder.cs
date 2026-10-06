@@ -55,7 +55,13 @@ namespace LumaReef.Editor
                     int index=i; var f=Asset<FishData>("Assets/ScriptableObjects/Fish/"+FishNames[i].Replace(" ","")+".asset");
                     f.id="resident-"+i; f.displayName=FishNames[i]; f.category=i<6?FishCategory.Small:i<13?FishCategory.Medium:i<19?FishCategory.Large:i<24?FishCategory.Special:FishCategory.Boss;
                     f.tint=Color.HSVToRGB((i*.137f+.08f)%1,.62f,.95f); f.multiplier=multipliers[i]; f.coinReward=Mathf.RoundToInt(multipliers[i]);
-                    f.speed=i<6?1.3f:i<13?1.05f:i<24?.75f:.46f; f.size=i<6?.8f:i<13?1.25f:i<24?1.9f:3.5f;
+                    f.speed=i<6?1.3f:i<13?1.05f:i<24?.75f:.46f;
+                    // Cá to hơn rõ ràng — nhìn ngầu hơn như iCá
+                    if(f.category==FishCategory.Small)        f.size=1.2f;
+                    else if(f.category==FishCategory.Medium)  f.size=1.85f;
+                    else if(f.category==FishCategory.Large)   f.size=2.8f;
+                    else if(f.category==FishCategory.Special) f.size=2.6f;
+                    else                                       f.size=4.5f; // Boss rất to
                     // killChance chuẩn casino: cá nhỏ dễ ăn, cá lớn cực khó, boss như nổ hũ
                     if(f.category==FishCategory.Small)        f.killChance=0.25f;  // ~25% / viên đạn
                     else if(f.category==FishCategory.Medium)  f.killChance=0.10f;  // ~10%
@@ -66,7 +72,8 @@ namespace LumaReef.Editor
                     f.hitboxScale=.85f; f.spawnWeight=1;
                     f.special=i==19?SpecialEffect.Lantern:i==20?SpecialEffect.Bomb:i==21?SpecialEffect.Treasure:i==22?SpecialEffect.Lightning:i==23?SpecialEffect.Golden:SpecialEffect.None;
                     string art="Assets/Art/"+(i>=24?"Boss":"Fish")+"/"+f.id+".png";
-                    f.sprite=SpriteAsset(art,192,128,(x,y)=>FishPixel(index,x,y,f.tint));
+                    // Độ phân giải cao hơn → ảnh nét hơn
+                    f.sprite=SpriteAsset(art,384,256,(x,y)=>FishPixel(index,x,y,f.tint));
                     f.animation=AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Art/Fish/Swim.asset");
                     if(f.animation==null){var clip=new AnimationClip();clip.name="Swim";clip.SetCurve("",typeof(Transform),"localScale.y",AnimationCurve.EaseInOut(0,1,.4f,1.035f));AssetDatabase.CreateAsset(clip,"Assets/Art/Fish/Swim.asset");f.animation=clip;}
                     FishPrefab(f); room.fish[i]=f; EditorUtility.SetDirty(f);

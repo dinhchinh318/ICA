@@ -72,7 +72,7 @@ namespace LumaReef.Core
             Skills=new SkillController(Catalog.skills); quests=new QuestController(SaveData,Catalog.quests,Wallet);
             world=new GameObject("Reef world").transform; world.SetParent(transform);
             var cameraGo=new GameObject("Reef Camera",typeof(Camera),typeof(AudioListener)); cameraGo.transform.SetParent(transform);
-            cameraView=cameraGo.GetComponent<Camera>(); cameraView.orthographic=true; cameraView.orthographicSize=9.6f; cameraView.backgroundColor=new Color(.02f,.09f,.17f); cameraView.transform.position=new Vector3(0,0,-10); cameraGo.tag="MainCamera";
+            cameraView=cameraGo.GetComponent<Camera>(); cameraView.orthographic=true; cameraView.orthographicSize=8.5f; cameraView.backgroundColor=new Color(.02f,.09f,.17f); cameraView.transform.position=new Vector3(0,0,-10); cameraGo.tag="MainCamera";
             cameraFX=new CameraFXManager(cameraView); BuildEnvironment();
             fish=new FixedPool<FishActor>(Catalog.room.maxFish,i=>new FishActor(world));
             bullets=new FixedPool<BulletActor>(Catalog.room.bulletCapacity,i=>new BulletActor(world,Catalog.disk,Catalog.particleMaterial));
@@ -171,7 +171,10 @@ namespace LumaReef.Core
         void OnKilled(FishData data,Vector2 at,long reward,int bet)
         {
             bool boss=data.category==FishCategory.Boss;
-            rewards.Play(at,reward,boss);effects.Death(at,boss?2.2f:data.size*.65f,boss);
+            rewards.Play(at,reward,boss);
+            // Hiệu ứng thu cá về HUD
+            rewards.Collect(at, data.sprite);
+            effects.Death(at,boss?2.2f:data.size*.65f,boss);
             if((SaveData.selectedCosmetic&32)!=0)effects.Burst(at,data.size*.6f,new Color(1,.4f,.85f));
             Audio.Play(boss?SoundCue.BossDeath:SoundCue.Death); Audio.Play(boss?SoundCue.Shower:SoundCue.Coin);
             if(data.category>=FishCategory.Large)cameraFX.Pulse(boss?.28f:data.category==FishCategory.Special?.12f:.045f,boss);
@@ -193,7 +196,9 @@ namespace LumaReef.Core
             if(isJackpot)
             {
                 Audio.Play(SoundCue.Shower);
-                ui.Announce($"🎊 NỔ HŨ!  {data.displayName.ToUpperInvariant()}  +{reward.ToString("N0")} 🎊");
+                // Mưa vàng toàn màn hình
+                for(int i=0;i<8;i++) rewards.Play(new Vector2(UnityEngine.Random.Range(-4f,4f),UnityEngine.Random.Range(-6f,6f)),0,false);
+                ui.ShowJackpot(data.displayName, reward);
             }
             else
             {
