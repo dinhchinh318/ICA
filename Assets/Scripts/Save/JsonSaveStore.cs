@@ -14,7 +14,7 @@ namespace LumaReef.Save
         public long[] questProgress=new long[6];
         public bool[] questClaimed=new bool[6];
         public bool achievementClaimed;
-        public int totalSessions;
+        public int totalSessions,vipGrantVersion;
     }
     public interface ISaveStore { PlayerSave Load(); bool Save(PlayerSave data); }
     public sealed class JsonSaveStore : ISaveStore

@@ -17,7 +17,7 @@ using LumaReef.VFX;
 using LumaReef.UI;
 namespace LumaReef.Core
 {
-    public sealed class ReefApp : MonoBehaviour
+    public sealed partial class ReefApp : MonoBehaviour
     {
         public static ReefApp Instance { get; private set; }
         public ReefCatalog Catalog { get; private set; }
@@ -39,6 +39,7 @@ namespace LumaReef.Core
         SpecialFishController specials;
         QuestController quests;
         ISaveStore store;
+        PendingProfileStore pendingProfile;
         EffectsPool effects;
         RewardViewPool rewards;
         CameraFXManager cameraFX;
@@ -94,49 +95,81 @@ namespace LumaReef.Core
             AuthenticateAndStart();
         }
         
-        async void AuthenticateAndStart()
+        void AuthenticateAndStart()
         {
-            if(smoke){ StartCoroutine(SmokeTest()); return; }
-            ui.Loading(true);
-            ui.Toast("🌐 KẾT NỐI SERVER CLOUD...");
-            
-            // Sinh username ngẫu nhiên nếu chưa có
-            string username = SaveData.username;
-            if(string.IsNullOrEmpty(username))
-            {
-                username = "Captain" + UnityEngine.Random.Range(1000,9999);
-                SaveData.username = username;
-            }
-            
-            // Mô phỏng đăng nhập Online lưu database (chuẩn bị cho multiplayer 4 người)
-            await LumaReef.Network.DatabaseManager.AuthenticateAsync(username, "auth_token_" + username);
-            
-            ui.Toast("✅ XÁC THỰC THÀNH CÔNG!  CHÀO " + username.ToUpperInvariant());
-            
-            // Cấp gói quà VIP Cực Khủng vào tài khoản (100M coins + 9999 kim cương)
-            if (SaveData.coins < 100000000) { SaveData.coins = 100000000; ui.Toast("🎁 VIP GIFT: +100,000,000 VÀNG  +9,999 KIM CƯƠNG!"); }
-            if (SaveData.diamonds < 9999) SaveData.diamonds = 9999;
-            if (SaveData.unlockedGuns < 255) SaveData.unlockedGuns = 255; // Mở khóa tất cả 8 súng miễn phí
-            Wallet = new Wallet(SaveData.coins, SaveData.diamonds);
-            Wallet.Changed += () => dirty = true;
-            // Rebuild Loadout với mask mới
-            Loadout = new GunLoadout(Catalog.room, SaveData.selectedGun, SaveData.unlockedGuns);
-            
-            // Re-bind wallet cho các hệ thống
-            Combat = new CombatResolver(fish, Wallet, new OfflineCombatAuthority(Environment.TickCount));
-            specials = new SpecialFishController(Catalog.room, Combat, fish, Wallet);
-            quests = new QuestController(SaveData, Catalog.quests, Wallet);
-            
-            Combat.Killed += OnKilled; Combat.Impact += (at, radius, color) => { effects.Net(at, radius, color, Loadout.Current.level); Audio.Play(SoundCue.Hit); };
-            Combat.BigWin += OnBigWin;
-            specials.Lightning += (from, to) => { effects.Lightning(from, to); Audio.Play(SoundCue.Lightning); };
-            specials.Treasure += (at, reward) => { rewards.Play(at, reward, true); effects.Burst(at, 1.5f, ReefUI.Gold); quests.Add(QuestMetric.Earnings, reward); ui.Toast("💎 KHO BÁU!  +" + reward.ToString("N0")); };
-
-            // Sync profile lên cloud
-            _ = LumaReef.Network.DatabaseManager.SaveProfileAsync(SaveData);
-            
-            ui.Loading(false);
-            StartCoroutine(LoadScene("MainMenuScene",false));
+            if(!smoke && SaveData.vipGrantVersion<1){Wallet.Credit(100000000);Wallet.AddDiamonds(9999);SaveData.vipGrantVersion=1;SaveNow();}
+            if(smoke)StartCoroutine(SmokeTest());else StartCoroutine(LoadScene("MainMenuScene",false));
+        }
+        void ApplyProfile(PlayerSave data)
+        {
+            SaveData=data;Wallet=new Wallet(data.coins,data.diamonds);Wallet.Changed+=()=>dirty=true;
+            Loadout=new GunLoadout(Catalog.room,data.selectedGun,data.unlockedGuns);
+            Combat=new CombatResolver(fish,Wallet,new OfflineCombatAuthority(Environment.TickCount));
+            specials=new SpecialFishController(Catalog.room,Combat,fish,Wallet);quests=new QuestController(data,Catalog.quests,Wallet);
+            Combat.Killed+=OnKilled;Combat.Impact+=(at,radius,color)=>{effects.Net(at,radius,color,Loadout.Current.level);Audio.Play(SoundCue.Hit);};Combat.BigWin+=OnBigWin;
+            specials.Lightning+=(from,to)=>{effects.Lightning(from,to);Audio.Play(SoundCue.Lightning);};
+            specials.Treasure+=(at,reward)=>{rewards.Play(at,reward,true);quests.Add(QuestMetric.Earnings,reward);};
+            Audio.Volume(data.music,data.sfx);fish.Clear();bullets.Clear();SeedFish();
+        }
+        bool accountBusy,syncBusy,syncBlocked,cloudPending;
+        string roomCode;
+        float roomHeartbeat;
+        public void Account()
+        {
+            OpenPanel("ACCOUNT");
+        }
+        public void Authenticate(string username,string password,bool register)
+        {
+            if(accountBusy||syncBusy||LumaReef.Network.DatabaseManager.LoggedIn)return;SaveNow();accountBusy=true;StartCoroutine(Login(username,password,register));
+        }
+        IEnumerator Login(string username,string password,bool register)
+        {
+            yield return LumaReef.Network.DatabaseManager.Authenticate(username,password,register,register?SaveData:null,reply=>{
+                if(!reply.ok){accountBusy=false;ui.Toast(LumaReef.Network.DatabaseManager.Explain(reply.error));return;}
+                roomCode=null;syncBlocked=false;
+                string directory=System.IO.Path.Combine(smoke?System.IO.Path.Combine(Application.temporaryCachePath,"LumaReefSmoke"):Application.persistentDataPath,"accounts",reply.userId);
+                store=new JsonSaveStore(directory);pendingProfile=new PendingProfileStore(directory);var pending=pendingProfile.Load();
+                bool recover=pending!=null&&pending.profile!=null&&pending.revision==reply.revision;
+                bool conflict=pending!=null&&pending.profile!=null&&!recover&&JsonUtility.ToJson(pending.profile)!=JsonUtility.ToJson(reply.profile);
+                if(conflict)pendingProfile.ArchiveConflict();
+                ApplyProfile(recover?pending.profile:reply.profile);store.Save(SaveData);dirty=recover;ui.CloseModal();
+                if(pending!=null&&!recover&&!conflict)pendingProfile.Clear();
+                ui.Toast(conflict?"Đã tải bản server mới hơn. Bản chưa đồng bộ được giữ trong pending-profile.json.":"ĐÃ ĐĂNG NHẬP • "+reply.username);
+                accountBusy=false;if(recover)StartCoroutine(SyncProfile());
+            });
+        }
+        IEnumerator SyncProfile()
+        {
+            syncBusy=true;cloudPending=false;string sent=JsonUtility.ToJson(SaveData);pendingProfile?.Write(LumaReef.Network.DatabaseManager.Revision,SaveData);yield return LumaReef.Network.DatabaseManager.SaveProfile(SaveData,reply=>{
+                syncBusy=false;if(reply.ok){if(sent==JsonUtility.ToJson(SaveData))pendingProfile?.Clear();else pendingProfile?.Write(reply.revision,SaveData);}if(!reply.ok){dirty=true;if(reply.error=="PROFILE_CONFLICT"||reply.error=="LOGIN_REQUIRED")syncBlocked=true;ui.Toast(LumaReef.Network.DatabaseManager.Explain(reply.error));}
+            });
+            if(cloudPending&&!syncBlocked)StartCoroutine(SyncProfile());
+        }
+        public void Logout()
+        {
+            if(accountBusy)return;SaveNow();accountBusy=true;StartCoroutine(EndSession());
+        }
+        IEnumerator EndSession()
+        {
+            while(syncBusy)yield return null;
+            yield return LumaReef.Network.DatabaseManager.Request("POST","/v1/logout","{}",reply=>{});
+            LumaReef.Network.DatabaseManager.Clear();pendingProfile=null;roomCode=null;cloudPending=false;syncBlocked=false;
+            store=new JsonSaveStore(Application.persistentDataPath);ApplyProfile(store.Load());dirty=false;accountBusy=false;
+            ui.CloseModal();ui.Toast("Đã đăng xuất. Bạn đang chơi với hồ sơ khách.");
+        }
+        void RoomRequest(string method,string path)
+        {
+            StartCoroutine(LumaReef.Network.DatabaseManager.Request(method,path,"{}",reply=>{
+                if(!reply.ok){ui.Toast(LumaReef.Network.DatabaseManager.Explain(reply.error));return;}
+                if(reply.room!=null){roomCode=reply.room.code;ShowRoom(reply.room);}else{roomCode=null;OpenPanel("ROOM");}
+            }));
+        }
+        void ShowRoom(LumaReef.Network.RoomInfo room)
+        {
+            ui.BeginPanel("PHÒNG • "+room.code,"Sảnh 4 người • Chia sẻ mã để mời bạn. Đồng bộ trận đấu đang phát triển.");
+            ui.RoomSeats(room);
+            ui.Row(5,"Rời phòng hiện tại","RỜI PHÒNG",()=>RoomRequest("POST","/v1/rooms/"+roomCode+"/leave"));
+            ui.Row(6,"Cập nhật danh sách người chơi","LÀM MỚI",()=>RoomRequest("GET","/v1/rooms/"+roomCode));
         }
         void BuildEnvironment()
         {
@@ -186,6 +219,7 @@ namespace LumaReef.Core
                 Audio.Boss(Boss!=null); emptyTimer-=dt;
             }
             if(gameManager.State!=GameState.Paused) { effects.Tick(realDt); rewards.Tick(realDt); }
+            if(roomCode!=null){roomHeartbeat+=realDt;if(roomHeartbeat>25){roomHeartbeat=0;StartCoroutine(LumaReef.Network.DatabaseManager.Request("POST","/v1/rooms/"+roomCode+"/heartbeat","{}",reply=>{if(!reply.ok)roomCode=null;}));}}
             saveTimer+=realDt; if(saveTimer>10) { saveTimer=0; if(dirty)SaveNow(); }
         }
         bool PointerAllowed()
@@ -211,7 +245,7 @@ namespace LumaReef.Core
                 var bolt=bullets.Rent();bolt.Launch(cannon.Muzzle,direction,gun,cost,gun.power*Skills.Strength(SkillKind.FirePower)/gun.barrels);
                 if((SaveData.selectedCosmetic&2)!=0)bolt.Renderer.color=new Color(1,.4f,.85f);
             }
-            cannon.Fired(gun,Skills.Strength(SkillKind.RapidFire));effects.Muzzle(cannon.Muzzle,cannon.Direction,gun.color);Audio.Play(SoundCue.Fire,.9f+Loadout.Selected*.06f);quests.Add(QuestMetric.Shots,gun.barrels);return true;
+            cannon.Fired(gun,Skills.Strength(SkillKind.RapidFire)*1.15f);effects.Muzzle(cannon.Muzzle,cannon.Direction,gun.color);Audio.Play(SoundCue.Fire,.9f+Loadout.Selected*.06f);quests.Add(QuestMetric.Shots,gun.barrels);return true;
         }
         void OnKilled(FishData data,Vector2 at,long reward,int bet)
         {
@@ -276,6 +310,15 @@ namespace LumaReef.Core
         public void OpenPanel(string name,int category=0)
         {
             if(gameManager.State==GameState.Playing)gameManager.SetState(GameState.Paused);
+            if(name=="ACCOUNT"){ui.AccountForm(LumaReef.Network.DatabaseManager.LoggedIn);return;}
+            if(name=="ROOM"){
+                if(!LumaReef.Network.DatabaseManager.LoggedIn){ui.AccountForm(false);ui.Toast("Đăng nhập để tạo phòng 4 người.");return;}
+                if(roomCode!=null){RoomRequest("GET","/v1/rooms/"+roomCode);return;}
+                ui.BeginPanel("PHÒNG 4 NGƯỜI","Tạo phòng hoặc nhập mã 8 ký tự. Đây là sảnh chờ; trận online chưa bật.");
+                var code=ui.Input(1,"Mã phòng (8 ký tự)",false);code.characterLimit=8;
+                ui.Row(3,"Mời bạn vào phòng mới","TẠO PHÒNG",()=>RoomRequest("POST","/v1/rooms"));
+                ui.Row(4,"Tham gia bằng mã mời","VÀO PHÒNG",()=>RoomRequest("POST","/v1/rooms/"+code.text.Trim().ToUpperInvariant()+"/join"));return;
+            }
             if(name=="SHOP") { Shop(category); return; }
             if(name=="QUEST")
             {
@@ -292,7 +335,7 @@ namespace LumaReef.Core
             }
             if(name=="DAILY REWARD") { ui.BeginPanel(name,"Your daily dive supplies. Resets at 00:00 UTC."); bool claimed=string.CompareOrdinal(SaveData.dailyClaim,DateTime.UtcNow.ToString("yyyy-MM-dd"))>=0; ui.Row(1,"1,500 virtual coins",claimed?"CLAIMED":"CLAIM",()=>{quests.Daily();SaveNow();OpenPanel(name);},!claimed); return; }
             if(name=="ACHIEVEMENT") { ui.BeginPanel(name,"Your first chapter beneath the waves."); ui.Row(1,"REEF EXPLORER  /  Catch 100 fish   "+Math.Min(100,SaveData.lifetimeKills)+" / 100",SaveData.achievementClaimed?"CLAIMED":"+5 GEMS",()=>{if(SaveData.lifetimeKills>=100&&!SaveData.achievementClaimed){SaveData.achievementClaimed=true;Wallet.AddDiamonds(5);SaveNow();OpenPanel(name);}},SaveData.lifetimeKills>=100&&!SaveData.achievementClaimed); return; }
-            if(name=="ROOM") { ui.BeginPanel("EXPEDITIONS","Offline rooms. Multiplayer transport is not connected in this build."); ui.Row(1,"01  LANTERN SHOALS  /  All 28 residents","DIVE IN",()=>{ui.CloseModal();Play();}); return; }
+            
             if(name=="FRIENDS") { ui.BeginPanel("FRIENDS","You are playing offline. Social connections will require a server."); return; }
             ui.BeginPanel("DIVER MAIL","Welcome to Luma Reef. Your starter cannon and 5,000 coins are ready.");
             ui.Row(1,"Field note: special residents trigger chain effects.","GOT IT",ui.CloseModal);
@@ -331,7 +374,7 @@ namespace LumaReef.Core
         {
             if(store==null)return false;
             SaveData.coins=Wallet.Coins;SaveData.diamonds=Wallet.Diamonds;SaveData.selectedGun=Loadout.Selected;SaveData.unlockedGuns=Loadout.UnlockMask;
-            bool ok=store.Save(SaveData); if(ok)dirty=false; return ok;
+            bool ok=store.Save(SaveData); if(!accountBusy&&LumaReef.Network.DatabaseManager.LoggedIn)pendingProfile?.Write(LumaReef.Network.DatabaseManager.Revision,SaveData);if(ok)dirty=false; if(!smoke&&!accountBusy&&LumaReef.Network.DatabaseManager.LoggedIn&&!syncBlocked){if(syncBusy)cloudPending=true;else StartCoroutine(SyncProfile());} return ok;
         }
         void OnApplicationPause(bool pause) { if(pause){SaveNow();if(gameManager!=null&&gameManager.State==GameState.Playing)OpenPanel("SETTINGS");} }
         void OnApplicationQuit() { SaveNow(); }
@@ -340,13 +383,18 @@ namespace LumaReef.Core
         IEnumerator SmokeTest()
         {
             yield return LoadScene("MainMenuScene",false);yield return new WaitForSeconds(.75f);
+            ui.ValidateLayout();
             ReefCapture.Save(cameraView,GetComponentInChildren<Canvas>(),"lobby-smoke.png");yield return new WaitForSeconds(.5f);
+            OpenPanel("ACCOUNT");yield return null;ReefCapture.Save(cameraView,GetComponentInChildren<Canvas>(),"login-smoke.png");ui.CloseModal();
+            Screen.SetResolution(1280,720,FullScreenMode.Windowed);yield return new WaitForSeconds(.5f);ui.ValidateLayout();
+            Screen.SetResolution(540,960,FullScreenMode.Windowed);yield return new WaitForSeconds(.5f);
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"--reef-auth-smoke")>=0)yield return AuthSmokeTest();
             yield return LoadScene("GameScene",true); yield return new WaitForSeconds(1);
             long initial=Wallet.Coins; Fire(); Debug.Assert(Wallet.Coins<initial,"Shot must debit wallet");
             var f=fish.Items[0]; if(!f.Active)f.Spawn(Catalog.room.fish[0],Catalog.room.paths[0],Vector2.zero,.4f);
             long before=Wallet.Coins; long expected=(long)Math.Round(Loadout.Bet*(double)f.Data.multiplier);
             Combat.GodMode=true; Combat.Hit(f,Loadout.Bet); Debug.Assert(Wallet.Coins>=before+expected,"Kill reward at least base");
-            Combat.Hit(f,Loadout.Bet); Debug.Assert(Wallet.Coins>=before+expected,"No duplicate kill reward"); Combat.GodMode=false;
+            long credited=Wallet.Coins;Combat.Hit(f,Loadout.Bet); Debug.Assert(Wallet.Coins==credited,"No duplicate kill reward"); Combat.GodMode=false;
             Skills.Use(0); Debug.Assert(Skills.Active(SkillKind.Freeze),"Freeze active"); Debug.Assert(!Skills.Use(0),"Cooldown blocks repeat");
             DebugAction(4); Debug.Assert(Boss!=null,"Boss spawns"); DebugAction(4);
             int bossCount=0;for(int i=0;i<fish.Items.Length;i++)if(fish.Items[i].Active&&fish.Items[i].Data.category==FishCategory.Boss)bossCount++;
@@ -358,6 +406,7 @@ namespace LumaReef.Core
             yield return new WaitForSeconds(.6f);OpenPanel("SHOP");yield return new WaitForSeconds(.5f);
             ReefCapture.Save(cameraView,GetComponentInChildren<Canvas>(),"shop-smoke.png");yield return new WaitForSeconds(.5f);ui.CloseModal();
             Debug.Assert(gameManager.State==GameState.Playing,"Closing shop resumes gameplay");
+            if(LumaReef.Network.DatabaseManager.LoggedIn){yield return LumaReef.Network.DatabaseManager.Request("POST","/v1/logout","{}",reply=>Debug.Assert(reply.ok,"Logout succeeds"));LumaReef.Network.DatabaseManager.Clear();}
             Debug.Log(smokeFailed?"LUMA_REEF_SMOKE_FAIL":"LUMA_REEF_SMOKE_PASS");Application.Quit(smokeFailed?1:0);
         }
     }

@@ -1,6 +1,6 @@
 # Luma Reef
 
-Game arcade bắn cá offline cho **Unity 6000.6.4f1 / URP 2D**, thiết kế **dọc 9:16, Canvas 1080×1920**. Nền, cá, súng, đạn, icon, VFX và khung UI là asset AI riêng cho Luma Reef; âm nhạc/SFX được tổng hợp bằng code. Xu và gem chỉ là tiền ảo; không có thanh toán hoặc cash-out.
+Game arcade bắn cá với trận offline, đăng nhập/database SQLite và sảnh chờ 4 người cho **Unity 6000.6.4f1 / URP 2D**, thiết kế **dọc 9:16, Canvas 1080×1920**. Nền, cá, súng, đạn, icon, VFX và khung UI là asset AI riêng cho Luma Reef; âm nhạc/SFX được tổng hợp bằng code. Xu và gem chỉ là tiền ảo; không có thanh toán hoặc cash-out.
 
 ## Chạy
 
@@ -14,15 +14,21 @@ Nếu mở project trên máy mới mà asset demo chưa được tạo, chạy 
 
 Build Windows: **Luma Reef → Build Windows Development**. Kết quả: `Builds/Windows/LumaReef.exe`. Phải giữ file EXE cạnh `LumaReef_Data`, `UnityPlayer.dll` và các thư mục hỗ trợ.
 
+## Đăng nhập và sửa khung hình
+
+Chạy `node Server/server.mjs` (Node 22.15+), vào **TÀI KHOẢN** để đăng ký/đăng nhập. Chi tiết database, lưu chờ và phòng: [Server/README.md](Server/README.md). Server không chạy vẫn chơi khách được, request mạng có timeout 5 giây.
+
+Canvas dùng Expand để giữ trọn thiết kế 9:16 trong cửa sổ bất kỳ. Nếu Editor còn zoom lớn, chọn **Luma Reef → Fit Game View (fix cropped preview)**; công cụ cũng tự fit khi bắt đầu Play. Viền đen hai bên cửa sổ ngang là phần bù tỷ lệ.
+
 ## Nội dung
 
 - 28 loài, gồm 6 nhỏ, 7 vừa, 6 lớn, 5 đặc biệt, 4 boss; giới hạn 35 cá và 1 boss.
-- 8 súng với 8 sprite AI và 8 loại đạn AI riêng, 3 mức cược cho mỗi súng, đạn nảy một lần, kiểm tra va chạm quét theo đoạn di chuyển, lưới AoE.
-- 21 đường cubic Bézier thuộc 7 kiểu; 6 đội hình; wave 25 cá, boss theo timer.
+- 8 súng với 8 sprite AI và 8 loại đạn AI riêng, 26 mức cược dùng chung, đạn nảy một lần, kiểm tra va chạm quét theo đoạn di chuyển, lưới hiển thị khi trúng, mỗi đạn bắt một mục tiêu.
+- 21 đường cubic Bézier thuộc 7 kiểu; 6 đội hình; wave chuyển nhịp 60–120 giây, đàn 10–19 cá, boss theo timer.
 - Cá đặc biệt: nổ AoE, điện AoE, điện dây chuyền, thưởng kho báu và thưởng xu vàng. Chuỗi hiệu ứng được xử lý bằng hàng đợi có giới hạn.
-- Boss có HP, cảnh báo, thanh máu, nhạc riêng, hit pause 65 ms, slow motion cục bộ và coin shower.
+- Boss dùng RNG, cảnh báo, thanh nguy hiểm, nhạc riêng, hit pause 65 ms, slow motion cục bộ và coin shower.
 - Pool cá, đạn, coin, chữ thưởng và particle/net/impact/explosion. Đạn có TrailRenderer, recoil và muzzle flash; lưới, nổ, băng, burst xu có sprite AI. Pool đầy sẽ bỏ hiệu ứng hoặc hoãn phát bắn, không tăng dung lượng trong Update.
-- Menu, room offline, shop, 6 daily quest, daily reward, achievement, mail giới thiệu, settings, save JSON có bản sao dự phòng.
+- Menu, sảnh phòng 4 người, shop, 6 daily quest, daily reward, achievement, mail giới thiệu, settings, save JSON có bản sao dự phòng.
 - Cosmetics mẫu có hiệu ứng nhìn thấy: màu đạn, avatar, khung avatar, màu hiệu ứng bắt cá. FRIENDS hiển thị trạng thái chưa kết nối server.
 
 ## Các phase và vị trí file
@@ -47,7 +53,7 @@ Texture không nén/mipmap trong bản Windows mẫu để tránh mất viền �
 
 `Assets/Resources/ReefCatalog.asset` là đầu vào duy nhất của runtime. Multiplier, xác suất bắt, tốc độ, HP, kích thước, trọng số spawn, mức cược, tốc độ đạn/súng, cooldown, timer và pool capacity nằm trong ScriptableObject. Sửa asset qua Inspector rồi Play. `coinReward` là giá trị tham khảo, reward thật luôn dùng `bet × multiplier`.
 
-Xác suất thường: `1 - (1 - killChance)^power`. Boss dùng HP thay cho RNG. Một volley nhiều nòng trừ một mức cược, chia capture power cho các viên để tránh tự nhân hiệu quả theo số nòng. Thông số demo ưu tiên nhìn thấy vòng chơi; chưa phải mô hình kinh tế cho sản phẩm live.
+Cơ chế hiện tại dùng `killChance` cho cả cá thường và boss. Cá lớn/đặc biệt/boss có bonus ngẫu nhiên; POWER chưa thay đổi tỷ lệ bắt trong cơ chế RNG hiện tại. Nhịp bắn được nhân 1,15 lần so với thông số súng. Thông số demo ưu tiên nhìn thấy vòng chơi; chưa phải mô hình kinh tế cho sản phẩm live.
 
 Khi thay art, thay `FishData.sprite` hoặc sprite trong catalog/gun/bullet data. Cá nhìn sang phải ở local +X. Đạn nhìn lên +Y. Toàn bộ actor cache component. Animation hiện tại dùng biến dạng nhẹ bằng transform; `AnimationClip` mẫu được giữ trong data để mở rộng sang animation frame.
 
@@ -55,7 +61,7 @@ Khi thay art, thay `FishData.sprite` hoặc sprite trong catalog/gun/bullet data
 
 Save: `Application.persistentDataPath/luma-reef-save.json`, `.bak` và file tạm khi ghi. Windows thường nằm ở `%USERPROFILE%/AppData/LocalLow/Lantern Workshop/Luma Reef/`. Lưu định kỳ nếu có thay đổi, lúc pause, đổi menu và thoát. Ngày quest/daily dùng UTC, ngăn nhận lại cùng ngày hoặc quay lùi ngày đã nhận.
 
-`ISaveStore`, `IWallet`, `ICombatAuthority` là các điểm thay implementation. Muốn server-authoritative, server phải sở hữu ví, RNG, HP, thời gian cooldown, xác thực phát bắn và id sự kiện chống thưởng trùng. Client chỉ gửi lệnh aim/fire/skill và dựng hình từ event/snapshot. Bản này chưa có networking, authentication hay chống sửa đồng hồ/save; không dùng các implementation offline làm authority cho server.
+`ISaveStore`, `IWallet`, `ICombatAuthority` là các điểm thay implementation. Muốn server-authoritative, server phải sở hữu ví, RNG, HP, thời gian cooldown, xác thực phát bắn và id sự kiện chống thưởng trùng. Client chỉ gửi lệnh aim/fire/skill và dựng hình từ event/snapshot. Bản này đã có xác thực HTTP, lưu SQLite và sảnh chờ bốn ghế; chưa đồng bộ cá/đạn/trận đấu hoặc chống sửa số tiền từ client. Xem [hướng dẫn server](Server/README.md).
 
 ## Kiểm chứng
 
@@ -68,6 +74,6 @@ Save: `Application.persistentDataPath/luma-reef-save.json`, `.bak` và file tạ
 
 Android: cài Android Build Support (SDK/NDK/OpenJDK) trong Unity Hub, mở Build Profiles → Android, giữ ba scene theo thứ tự Boot/MainMenu/Game; minimum API 26, portrait. Input đã hỗ trợ touch. Máy hiện tại chỉ có Windows Build Support nên chưa xuất APK. iOS cần module iOS và Xcode trên macOS.
 
-Mục tiêu 60 FPS, đã dùng fixed pools và sprite atlas. Chưa thể cam kết 60 FPS trên máy Android tầm trung nếu chưa profile thiết bị thật. Gameplay tick không dùng LINQ hoặc tạo actor; UI số đếm/chữ thưởng còn tạo chuỗi khi cập nhật. Art/VFX là asset mẫu có thể thay thế, không phải bộ art production hoàn thiện. Các mục social/multiplayer hiện là trạng thái offline có ghi rõ trong UI.
+Mục tiêu 60 FPS, đã dùng fixed pools và sprite atlas. Chưa thể cam kết 60 FPS trên máy Android tầm trung nếu chưa profile thiết bị thật. Gameplay tick không dùng LINQ hoặc tạo actor; UI số đếm/chữ thưởng còn tạo chuỗi khi cập nhật. Art/VFX là asset mẫu có thể thay thế, không phải bộ art production hoàn thiện. Bạn bè chưa kết nối; phòng hiện là sảnh chờ có bốn góc, chưa bật trận online.
 
 Tham khảo API mixer khi xây công cụ Editor: [Unity C# reference](https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Audio/Mixer/Bindings/AudioMixerController.cs). Reflection chỉ nằm ở công cụ Editor; runtime dùng API audio công khai.

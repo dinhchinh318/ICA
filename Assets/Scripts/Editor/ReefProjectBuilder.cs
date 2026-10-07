@@ -21,12 +21,14 @@ namespace LumaReef.Editor
         static readonly string[] GunNames={"Sprout","Tideglass","Prism","Twin Current","Stormcoil","Ember Bloom","Trinity","Solstice Beam"};
         static readonly string[] Scenes={"BootScene","MainMenuScene","GameScene"};
         static double nextPoll;
-        static ReefProjectBuilder() { EditorApplication.update+=Poll; }
+        static ReefProjectBuilder() { EditorApplication.update+=Poll; EditorApplication.playModeStateChanged+=state=>{if(state==PlayModeStateChange.EnteredPlayMode)FitPreview();}; }
         static void Poll()
         {
             if(File.Exists("Temp/reef-stop-play.request")){File.Delete("Temp/reef-stop-play.request");EditorApplication.isPlaying=false;return;}
             if(EditorApplication.timeSinceStartup<nextPoll||EditorApplication.isCompiling||EditorApplication.isUpdating||EditorApplication.isPlayingOrWillChangePlaymode)return;
             nextPoll=EditorApplication.timeSinceStartup+2;
+            if(File.Exists("Temp/reef-fit.request")){File.Delete("Temp/reef-fit.request");FitPreview();}
+            if(File.Exists("Temp/reef-art.request")){File.Delete("Temp/reef-art.request");ReefAIImporter.Apply();}
             if(File.Exists("Temp/reef-generate.request")) { File.Delete("Temp/reef-generate.request"); Generate(); }
             if(File.Exists("Temp/reef-build.request")) { File.Delete("Temp/reef-build.request"); BuildWindows(); }
         }
@@ -62,12 +64,12 @@ namespace LumaReef.Editor
                     else if(f.category==FishCategory.Large)   f.size=3.4f;
                     else if(f.category==FishCategory.Special) f.size=3.2f;
                     else                                       f.size=5.5f; // Boss siêu to
-                    // killChance cực gắt: Khó như đánh bạc
-                    if(f.category==FishCategory.Small)        f.killChance=0.15f;  // 15% (bắn vài viên mới chết)
-                    else if(f.category==FishCategory.Medium)  f.killChance=0.035f; // 3.5%
-                    else if(f.category==FishCategory.Large)   f.killChance=0.008f; // 0.8%
-                    else if(f.category==FishCategory.Special) f.killChance=0.004f; // 0.4%
-                    else                                       f.killChance=Mathf.Max(0.001f, 0.15f/multipliers[i]); // Boss: cực khó
+                    // killChance cực gắt: Khó như đánh bạc (Đã giảm cực thấp theo yêu cầu)
+                    if(f.category==FishCategory.Small)        f.killChance=0.07f;  // 7%
+                    else if(f.category==FishCategory.Medium)  f.killChance=0.015f; // 1.5%
+                    else if(f.category==FishCategory.Large)   f.killChance=0.003f; // 0.3%
+                    else if(f.category==FishCategory.Special) f.killChance=0.001f; // 0.1%
+                    else                                       f.killChance=Mathf.Max(0.0002f, 0.05f/multipliers[i]); // Boss: cực khó
                     f.bossHP=0; // Không dùng HP — dùng tỉ lệ RNG thuần
                     f.hitboxScale=.85f; f.spawnWeight=1;
                     f.special=i==19?SpecialEffect.Lantern:i==20?SpecialEffect.Bomb:i==21?SpecialEffect.Treasure:i==22?SpecialEffect.Lightning:i==23?SpecialEffect.Golden:SpecialEffect.None;
@@ -265,10 +267,27 @@ namespace LumaReef.Editor
         [MenuItem("Luma Reef/Build Windows Development")]
         public static void BuildWindows()
         {
+            PlayerSettings.insecureHttpOption=InsecureHttpOption.DevelopmentOnly;
+            FitPreview();
             ReefValidation.Run();
             Directory.CreateDirectory("Builds/Windows");var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=Array.ConvertAll(Scenes,s=>"Assets/Scenes/"+s+".unity"),locationPathName="Builds/Windows/LumaReef.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.Development});
             File.WriteAllText("Temp/reef-build-result.txt",report.summary.result+" / errors="+report.summary.totalErrors+" / bytes="+report.summary.totalSize);
             if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Windows build failed");
+        }
+        [MenuItem("Luma Reef/Fit Game View (fix cropped preview)")]
+        public static void FitPreview()
+        {
+            // Unity's own default fit scale, rather than the persisted 1.3x zoom.
+            var type=typeof(EditorWindow).Assembly.GetType("UnityEditor.GameView");
+            if(type==null)return;
+            foreach(var view in Resources.FindObjectsOfTypeAll(type))
+            {
+                const BindingFlags flags=BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
+                var zoom=type.GetField("m_ZoomArea",flags)?.GetValue(view);
+                var scale=type.GetField("m_defaultScale",flags)?.GetValue(view);
+                if(zoom!=null&&scale is float value)zoom.GetType().GetMethod("SetTransform",flags,null,new[]{typeof(Vector2),typeof(Vector2)},null)?.Invoke(zoom,new object[]{Vector2.zero,Vector2.one*value});
+                ((EditorWindow)view).Repaint();
+            }
         }
         public static void BatchBuild() { Generate();BuildWindows(); }
     }

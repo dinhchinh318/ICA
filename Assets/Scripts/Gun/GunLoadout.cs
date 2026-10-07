@@ -10,9 +10,9 @@ namespace LumaReef.Gun
         public int UnlockMask { get; private set; }
         public GunData Current => room.guns[Selected];
         
+        static readonly int[] vals = { 5,10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000,200000,500000,1000000,2000000,5000000,10000000,20000000,50000000,100000000,200000000,500000000,1000000000 };
         public int Bet {
             get {
-                int[] vals = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000, 200000000, 500000000, 1000000000 };
                 if (BetIndex < vals.Length) return vals[BetIndex];
                 return 1000000000;
             }

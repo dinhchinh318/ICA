@@ -26,7 +26,7 @@ namespace LumaReef.UI
         float toastSlide; // -1 = hidden, 0..1 = visible
         float bossBarPulse;
         float jackpotShake;
-        int jackpotCoinFrame;
+
         float jackpotCoinTimer;
         readonly Text[] jackpotCoins=new Text[18];
         readonly RectTransform[] jackpotCoinRT=new RectTransform[18];
@@ -42,8 +42,8 @@ namespace LumaReef.UI
             this.app=app;this.font=font;
             var go=new GameObject("Portrait Canvas 1080x1920",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));go.transform.SetParent(app.transform);
             var canvas=go.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=100;
-            // Sharper canvas: MatchWidthOrHeight=0.5 giữ tỉ lệ chuẩn cho cả portrait lẫn landscape
-            var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1080,1920);scaler.screenMatchMode=CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;scaler.matchWidthOrHeight=0.5f;
+            // Fit the entire 9:16 design inside any window, including a wide Editor Game View.
+            var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1080,1920);scaler.screenMatchMode=CanvasScaler.ScreenMatchMode.Expand;scaler.matchWidthOrHeight=0.5f;
             root=(RectTransform)go.transform;
             new GameObject("Input UI",typeof(EventSystem),typeof(InputSystemUIInputModule)).transform.SetParent(app.transform);
             // ─── LOBBY / MENU ───────────────────────────────────────────────
@@ -62,6 +62,7 @@ namespace LumaReef.UI
             Label(menu.transform,"THUYỀN TRƯỞNG",-82,785,465,42,29,Color.white);
             profile=Label(menu.transform,"",-82,738,465,44,24,Aqua);
             Label(menu.transform,"◆ NHÀ THÁM HIỂM ĐẠI DƯƠNG",-56,695,514,35,19,Gold);
+            Button(menu.transform,"TÀI KHOẢN",365,746,286,92,Ink,app.Account,25);
             // Logo to bự, chữ cực đẹp
             Label(menu.transform,"LUMA REEF",0,553,850,103,70,Gold);
             Label(menu.transform,"HUYỀN THOẠI BIỂN SÂU",0,487,700,44,25,Color.white);
@@ -76,9 +77,9 @@ namespace LumaReef.UI
             RoomBubble(menu.transform,320,-611,220,15,"VỰC ÁNH TRĂNG",()=>app.OpenPanel("ROOM"));
             RoomBubble(menu.transform,0,-575,306,25,"ĐIỆN NGỌC TRIỀU",()=>app.Play());
             Button(menu.transform,"CHƠI NGAY",0,-771,453,97,new Color(1,.55f,.07f),()=>app.Play(),40);
-            Panel(menu.transform,"Navigation",0,-909,1080,142,new Color(.01f,.12f,.23f,.95f));
+            Panel(menu.transform,"Navigation",0,-889,1080,142,new Color(.01f,.12f,.23f,.95f));
             string[] tabs={"Hộp thư","Cửa hàng","Nhiệm vụ","Bộ sưu tập","Bạn bè","Cài đặt"};string[] actions={"MAIL","SHOP","QUEST","ACHIEVEMENT","FRIENDS","SETTINGS"};int[] icons={2,3,4,5,15,7};
-            for(int i=0;i<tabs.Length;i++){string action=actions[i];Badge(menu.transform,icons[i],tabs[i],-450+i*180,-891,()=>app.OpenPanel(action),.95f);}
+            for(int i=0;i<tabs.Length;i++){string action=actions[i];Badge(menu.transform,icons[i],tabs[i],-450+i*180,-867,()=>app.OpenPanel(action),.95f);}
             // ─── GAMEPLAY HUD ───────────────────────────────────────────────
             game=Panel(root,"Portrait gameplay HUD",0,0,1080,1920,Color.clear).gameObject;
             Panel(game.transform,"Header shade",0,889,1080,142,new Color(.01f,.08f,.14f,.92f));
@@ -124,16 +125,16 @@ namespace LumaReef.UI
             // ─── TOAST (slide-in animation) ─────────────────────────────────
             var toastGo=new GameObject("Toast",typeof(RectTransform),typeof(Image));toastGo.transform.SetParent(root,false);
             toastRT=(RectTransform)toastGo.transform;toastRT.anchoredPosition=new Vector2(0,280);toastRT.sizeDelta=new Vector2(900,80);
-            var toastBG=toastGo.GetComponent<Image>();toastBG.color=new Color(.04f,.28f,.45f,.92f);
-            Panel(toastRT,"Toast border",0,0,900,80,new Color(1,.82f,.22f,.6f));
+            var toastBG=toastGo.GetComponent<Image>();toastBG.color=new Color(.04f,.28f,.45f,.92f);toastBG.raycastTarget=false;
+            if(app.Catalog.uiSkins.Length>2)Skin(toastBG,2);
             toast=Label(toastRT,"",0,0,880,72,28,Color.white);
             toastRT.anchoredPosition=new Vector2(0,1100); // Start off screen
-            toastSlide=-1;
+            toastSlide=-1;toastRT.gameObject.SetActive(false);
             // Loading screen
             loading=Panel(root,"Loading",0,0,1080,1920,Ink,true).gameObject;Icon(loading.transform,14,0,110,280);
             Label(loading.transform,"ĐANG KHÁM PHÁ ĐẠI DƯƠNG…",0,-127,970,130,34,Aqua);
             // ─── JACKPOT OVERLAY siêu bùng nổ ──────────────────────────────
-            jackpotOverlay=new GameObject("Jackpot Overlay",typeof(RectTransform),typeof(Canvas));
+            jackpotOverlay=new GameObject("Jackpot Overlay",typeof(RectTransform),typeof(Canvas),typeof(GraphicRaycaster));
             jackpotOverlay.transform.SetParent(root,false);
             jackpotOverlay.GetComponent<Canvas>().overrideSorting=true;
             jackpotOverlay.GetComponent<Canvas>().sortingOrder=200;
@@ -145,13 +146,13 @@ namespace LumaReef.UI
             Panel(jackpotPanel,"Glow 1",0,0,940,620,new Color(.6f,.42f,.02f,.22f));
             Panel(jackpotPanel,"Glow 2",0,0,860,540,new Color(.9f,.65f,.04f,.12f));
             // Labels
-            Label(jpRT,"🎊",0,520,300,180,110,new Color(1,.92f,.1f));
+            Icon(jpRT,5,0,525,180);
             Label(jpRT,"NỔ HŨ !!",0,380,960,140,76,new Color(1,.92f,.1f));
             jackpotTitle=Label(jpRT,"",0,230,960,110,44,Color.white);
             Label(jpRT,"PHẦN THƯỞNG KHỔNG LỒ",0,145,900,75,28,new Color(.8f,.85f,1f));
             jackpotAmount=Label(jpRT,"",0,20,960,130,72,new Color(1,.92f,.1f));
             jackpotMult=Label(jpRT,"",0,-90,700,65,30,new Color(.6f,.95f,.7f));
-            Label(jpRT,"🎊 CHÚC MỪNG! 🎊",0,-190,880,80,34,Gold);
+            Label(jpRT,"CHÚC MỪNG!",0,-190,880,80,34,Gold);
             Label(jpRT,"CHẠM ĐỂ TIẾP TỤC",0,-310,700,55,22,Muted);
             // Coin rain sprites
             for(int i=0;i<18;i++)
@@ -192,23 +193,34 @@ namespace LumaReef.UI
         void Badge(Transform parent,int icon,string title,float x,float y,Action callback,float scale=1)
         {
             var go=new GameObject(title,typeof(RectTransform));var rt=(RectTransform)go.transform;rt.SetParent(parent,false);rt.anchoredPosition=new Vector2(x,y);rt.sizeDelta=new Vector2(152,160);rt.localScale=Vector3.one*scale;
-            var image=Art(rt,app.Catalog.disk,0,13,131,131);image.color=new Color(.11f,.5f,.73f,.8f);image.raycastTarget=true;Art(rt,app.Catalog.ring,0,13,139,139).color=Gold;
+            var image=Art(rt,app.Catalog.disk,0,13,131,131);image.color=new Color(.11f,.5f,.73f,.8f);image.raycastTarget=true;if(app.Catalog.uiSkins.Length<=5)Art(rt,app.Catalog.ring,0,13,139,139).color=Gold;
             if(app.Catalog.uiSkins.Length>5){image.sprite=app.Catalog.uiSkins[5];image.color=Color.white;}
             Icon(rt,icon,0,17,120);Label(rt,title,0,-66,182,43,21,Gold);var button=image.gameObject.AddComponent<Button>();button.onClick.AddListener(()=>{app.Audio.Play(SoundCue.Button);callback();});image.gameObject.AddComponent<ButtonFeedback>();
         }
         void RoomBubble(Transform parent,float x,float y,float size,int fishIndex,string title,Action callback)
         {
-            var image=Art(parent,app.Catalog.disk,x,y,size,size);image.color=new Color(.15f,.65f,1,.85f);image.raycastTarget=true;Art(parent,app.Catalog.ring,x,y,size+15,size+15).color=Gold;
+            var image=Art(parent,app.Catalog.disk,x,y,size,size);image.color=new Color(.15f,.65f,1,.85f);image.raycastTarget=true;if(app.Catalog.uiSkins.Length<=5)Art(parent,app.Catalog.ring,x,y,size+15,size+15).color=Gold;
             if(app.Catalog.uiSkins.Length>5){image.sprite=app.Catalog.uiSkins[5];image.color=Color.white;}
-            Art(parent,app.Catalog.room.fish[fishIndex].sprite,x,y+8,size*.81f,size*.77f);Label(parent,title,x,y-size*.53f,size*1.3f,58,size>250?28:20,Color.white);
+            Art(parent,app.Catalog.room.fish[fishIndex].sprite,x,y+8,size*.81f,size*.77f);Label(parent,title,x,y-size*.48f,size*1.3f,58,size>250?28:20,Color.white);
             var button=image.gameObject.AddComponent<Button>();button.onClick.AddListener(()=>{app.Audio.Play(SoundCue.Button);callback();});
         }
         public void ShowMenu(bool value){menu.SetActive(value);game.SetActive(!value);modal.SetActive(false);debug.SetActive(false);}
+        public void ValidateLayout()
+        {
+            Canvas.ForceUpdateCanvases();
+            Debug.Assert(root.rect.width>=1079&&root.rect.height>=1919,"Canvas must fit full portrait design at any screen aspect");
+            Debug.Assert(!loading.activeSelf,"Loading overlay must be dismissed after scene load");
+            var corners=new Vector3[4];
+            foreach(var button in menu.GetComponentsInChildren<Button>()){
+                ((RectTransform)button.transform).GetWorldCorners(corners);
+                foreach(var corner in corners){var p=root.InverseTransformPoint(corner);Debug.Assert(root.rect.Contains(new Vector2(p.x,p.y)),"Lobby button must fit visible canvas: "+button.name);}
+            }
+        }
         public void Loading(bool value)=>loading.SetActive(value);
         public void Announce(string value){eventText.text=value;eventTime=5;}
         public void Toast(string value)
         {
-            toast.text=value;toastTime=3.2f;toastSlide=0;
+            toastRT.gameObject.SetActive(true);toast.text=value;toastTime=3.2f;toastSlide=0;
             // Slide in from top
             if(toastRT!=null)toastRT.anchoredPosition=new Vector2(0,1100);
         }
@@ -216,7 +228,7 @@ namespace LumaReef.UI
         {
             jackpotTitle.text=fishName.ToUpperInvariant();
             jackpotAmount.text="+ "+reward.ToString("N0")+" VÀNG";
-            jackpotMult.text="🎰 JACKPOT x"+(reward/(Mathf.Max(1,app.Loadout.Bet))).ToString("N0");
+            jackpotMult.text="JACKPOT x"+(reward/(Mathf.Max(1,app.Loadout.Bet))).ToString("N0");
             jackpotOverlay.SetActive(true); jackpotTime=5f; jackpotShake=0.5f;
             // Reset coins
             for(int i=0;i<18;i++)
@@ -234,6 +246,34 @@ namespace LumaReef.UI
             modal.SetActive(true);Label(modalContent,title,-32,623,850,86,38,Gold);Label(modalContent,subtitle,0,518,921,117,26,Muted);
             Button(modalContent,"X",433,640,72,72,new Color(.16f,.31f,.39f),CloseModal,30);
         }
+        public InputField Input(int index,string hint,bool password)
+        {
+            float y=372-index*120;var rt=Panel(modalContent,"Input",0,y,910,96,new Color(.025f,.12f,.20f),true);
+            var field=rt.gameObject.AddComponent<InputField>();field.targetGraphic=rt.GetComponent<Image>();
+            var text=Label(rt,"",0,0,850,86,30,Color.white);text.alignment=TextAnchor.MiddleLeft;text.supportRichText=false;
+            var placeholder=Label(rt,hint,0,0,850,86,27,Muted);placeholder.alignment=TextAnchor.MiddleLeft;
+            field.textComponent=text;field.placeholder=placeholder;field.characterLimit=password?128:24;
+            field.contentType=password?InputField.ContentType.Password:InputField.ContentType.Standard;return field;
+        }
+        public void RoomSeats(LumaReef.Network.RoomInfo room)
+        {
+            string[] corners={"DƯỚI TRÁI","DƯỚI PHẢI","TRÊN TRÁI","TRÊN PHẢI"};
+            for(int i=0;i<4;i++){
+                float x=i%2==0?-235:235,y=i<2?-5:260;string player="Đang chờ...";bool occupied=false;
+                foreach(var seat in room.seats)if(seat.seat==i){player=seat.username;occupied=true;}
+                var panel=Panel(modalContent,"Seat "+i,x,y,430,230,new Color(.025f,.16f,.25f));
+                if(app.Catalog.cannonSprites.Length>i){var art=Art(panel,app.Catalog.cannonSprites[i],0,20,110,115);art.color=occupied?Color.white:new Color(1,1,1,.25f);}
+                Label(panel,corners[i],0,87,405,38,22,Gold);Label(panel,player,0,-73,405,46,24,occupied?Aqua:Muted);
+            }
+        }
+        public void AccountForm(bool loggedIn)
+        {
+            BeginPanel("TÀI KHOẢN",loggedIn?"Đã đăng nhập: "+LumaReef.Network.DatabaseManager.CurrentUsername+" • Lưu SQLite trên server.":"Tên 3–24 ký tự a-z, 0-9, _. Mật khẩu tối thiểu 8 ký tự. Có thể đóng để chơi khách.");
+            if(loggedIn){Row(1,"Lưu tiến trình lên database","LƯU NGAY",()=>app.SaveNow());Row(3,"Phòng chờ dành cho 4 người","PHÒNG CHƠI",()=>app.OpenPanel("ROOM"));Row(5,"Trở lại hồ sơ khách trên máy","ĐĂNG XUẤT",app.Logout);return;}
+            var username=Input(0,"Tên đăng nhập",false);var password=Input(1,"Mật khẩu",true);
+            Row(3,"Tải tiến trình đã lưu trên server","ĐĂNG NHẬP",()=>app.Authenticate(username.text.Trim(),password.text,false));
+            Row(4,"Tạo tài khoản từ tiến trình khách","ĐĂNG KÝ",()=>app.Authenticate(username.text.Trim(),password.text,true));
+        }
         public void Row(int index,string description,string action,Action callback,bool enabled=true)
         {
             float y=372-index*120;Panel(modalContent,"Row",0,y,930,106,new Color(.04f,.20f,.30f));Label(modalContent,description,-147,y,602,96,25,Color.white);
@@ -247,11 +287,11 @@ namespace LumaReef.UI
             if(toastSlide>=0 && toastRT!=null)
             {
                 toastSlide=Mathf.MoveTowards(toastSlide,1,dt*5);
-                float targetY=toastTime>0.3f?280:-200;
+                float targetY=toastTime>0.3f?490:1100;
                 float curY=toastRT.anchoredPosition.y;
                 toastRT.anchoredPosition=new Vector2(0,Mathf.Lerp(curY,targetY,dt*8));
                 if(toastTime>0)toastTime-=dt;
-                if(toastTime<=0&&Mathf.Abs(curY-(-200))<2){toastRT.anchoredPosition=new Vector2(0,-200);toastSlide=-1;toast.text="";}
+                if(toastTime<=0&&Mathf.Abs(curY-1100)<2){toastRT.anchoredPosition=new Vector2(0,1100);toastSlide=-1;toastRT.gameObject.SetActive(false);toast.text="";}
             }
             // ── Event text bounce ─────────────────────────────────────────
             if(eventTime>0){eventTime-=dt;eventText.transform.localScale=Vector3.one*(1+Mathf.Sin(eventTime*12)*.05f);if(eventTime<=0)eventText.text="";}
@@ -300,7 +340,7 @@ namespace LumaReef.UI
             bet.text="CƯỢC  "+app.Loadout.Bet;gunLabel.text="SÚNG CẤP "+(app.Loadout.Selected+1);autoLabel.color=app.Auto?Aqua:Color.white;lockLabel.color=app.Lock?Aqua:Color.white;
             for(int i=0;i<6;i++){float cd=app.Skills.Cooldown(i);skillButtons[i].interactable=cd<=0;skillLabels[i].text=cd>0?Mathf.CeilToInt(cd)+"s":app.Catalog.skills[i].displayName;}
             var boss=app.Boss;bossRoot.SetActive(boss!=null);
-            if(boss!=null){bossLabel.text=boss.Data.displayName.ToUpperInvariant()+"  ⚔  CẤP NGUY HIỂM";bossFill.rectTransform.localScale=new Vector3(Mathf.Clamp01(boss.HP/Mathf.Max(1,boss.Data.bossHP)),1,1);}
+            if(boss!=null){bossLabel.text=boss.Data.displayName.ToUpperInvariant()+"  ⚔  CẤP NGUY HIỂM";bossFill.rectTransform.localScale=new Vector3(boss.Data.bossHP>0?Mathf.Clamp01(boss.HP/boss.Data.bossHP):1,1,1);}
             if(debug.activeSelf)fpsText.text="FPS "+Mathf.RoundToInt(1/Mathf.Max(.001f,dt))+" / FISH "+app.FishCount+"\nBOLTS "+app.BulletCount+" / VFX "+app.EffectCount+" / GOD "+app.Combat.GodMode;
         }
     }

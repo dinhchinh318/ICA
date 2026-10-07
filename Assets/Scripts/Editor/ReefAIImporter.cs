@@ -21,6 +21,10 @@ namespace LumaReef.Editor
             catalog.lobbyBackground=Single("Assets/Art/AI/lobby.png");catalog.background=Single("Assets/Art/AI/arena.png");
             var fish=Slice("Assets/Art/AI/fish-atlas.png",4,7);
             for(int i=0;i<fish.Length;i++){catalog.room.fish[i].sprite=fish[i];EditorUtility.SetDirty(catalog.room.fish[i]);}
+            if(File.Exists("Assets/Art/AI/boss-hd-atlas.png")){
+                var bosses=Slice("Assets/Art/AI/boss-hd-atlas.png",2,2);
+                for(int i=0;i<4;i++){catalog.room.fish[24+i].sprite=bosses[i];EditorUtility.SetDirty(catalog.room.fish[24+i]);}
+            }
             catalog.uiIcons=Slice("Assets/Art/AI/ui-atlas.png",4,4);catalog.cannonSprites=Slice("Assets/Art/AI/cannons-atlas.png",4,2);
             for(int i=0;i<catalog.room.guns.Length;i++){catalog.room.guns[i].body=catalog.cannonSprites[i];EditorUtility.SetDirty(catalog.room.guns[i]);}
             for(int i=0;i<catalog.skills.Length;i++){catalog.skills[i].icon=catalog.uiIcons[8+i];EditorUtility.SetDirty(catalog.skills[i]);}

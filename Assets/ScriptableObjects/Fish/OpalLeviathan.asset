@@ -15,7 +15,7 @@ MonoBehaviour:
   id: resident-27
   displayName: Opal Leviathan
   category: 4
-  sprite: {fileID: -1476800371908877753, guid: 16897cb6cf90af941998112418a2454e, type: 3}
+  sprite: {fileID: 8476749756178533168, guid: d21a156f5f8e41347bc4d1da0908ce81, type: 3}
   animation: {fileID: 7400000, guid: d128e7d3c1031cc45aa25037770c15ae, type: 2}
   speed: 0.46
   multiplier: 240
